@@ -1,7 +1,6 @@
-# laser-them
+﻿# laser-them
 
 # Hello Rickard
-#YO
 
 Collision warning system with LIDAR
 
