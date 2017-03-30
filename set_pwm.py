@@ -13,7 +13,7 @@ def pwm_dimm(io):
     io.pinMode(pin, io.PWM_OUTPUT)
 
     while 1:
-        io.pwmWrite(pin, 500)
+        io.pwmWrite(pin, 100)
 
 
 # direct
