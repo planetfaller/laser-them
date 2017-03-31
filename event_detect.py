@@ -12,7 +12,7 @@ countTime = datetime.datetime.now()
 
 raw_input("Press Enter when ready\n>")
 
-print ("Waiting for rising edge on port 23")
+print ("Waiting for rising edge on GPIO-port 23")
 
 lastTime = datetime.datetime.now()
 
