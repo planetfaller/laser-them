@@ -43,6 +43,8 @@ unsigned long highestTime = 0; //For debugging
 word tmpDist;
 unsigned long timeDiffer;
 
+int angOffset = 340;
+
 byte dummyData[4];
 int mCountToPrint;
 int mCount=0;
@@ -81,7 +83,7 @@ void setup() {
   Serial.begin(115200); // serial baud rate
   Wire.begin(addr); // initialize i2c
   Wire.setClock(400000L); // set i2c clock speed
-
+ 
   Wire.beginTransmission(addr);
   Wire.write(0x04); // register to write
 
@@ -91,15 +93,15 @@ void setup() {
 
   Wire.beginTransmission(addr);
   Wire.write(0x02); // Acquisition Count
-  Wire.write(0x10); // Default is 0x80 // 0d = 13
+  Wire.write(0x40); // Default is 0x80 // 0d = 13
   Wire.endTransmission();
 
   Wire.beginTransmission(addr);
   Wire.write(0x12); // Reference acquisition
-  Wire.write(0x03); // Count of 3 (default is 5)
-  Wire.endTransmission();
+  Wire.write(0x05); // Count of 3 (default is 5)
+  Wire.endTransmission(); 
 
-  delay(1000); // delay to prepare ESC
+  delay(500); // delay to prepare ESC
 }
 
 void loop() {

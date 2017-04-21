@@ -10,6 +10,6 @@ void printToSerial() {
   //  Serial.write(highByte(storedLoc));
   //  Serial.write(lowByte(storedLoc));
 
-  String toPrint = String(storedDist, DEC) + "&" + String(storedLoc, DEC) +  "&" + String(rotFreq, 2)+  "&" + String(mFreq, 2) + "&" + mCount;
+  String toPrint = String(storedDist, DEC) + "&" + String(storedLoc, DEC);// +  "&" + String(rotFreq, 2)+  "&" + String(mFreq, 2) + "&" + mCount;
   Serial.println(toPrint);
 }
