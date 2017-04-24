@@ -404,7 +404,7 @@ void serialEvent(Serial p) {
       distanceList.append(distance);
       angleList.append(angle);
     }
-
+    println(angle);
     p.clear();
     freqCnt++;
   }

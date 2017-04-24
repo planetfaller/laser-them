@@ -56,7 +56,7 @@ unsigned long totalLoopTime;
 int counter = 0;
 
 Timer timerOne;
-float rotFreq;
+float rotFreq=0;
 unsigned long zeroCrossingTime = 0;
 unsigned long lastZeroCrossingTime = 0;
 boolean lastBiasMode = false;
@@ -64,6 +64,12 @@ word storedDist;
 word storedLoc;
 boolean started = false;
 boolean nmtStarted = false;
+
+float setValue = 3.0;
+float error=0;
+int errorSum = 0;
+
+int escSpeed=1000;
 
 // using integers for storing readings, might want to use float
 
@@ -93,12 +99,12 @@ void setup() {
 
   Wire.beginTransmission(addr);
   Wire.write(0x02); // Acquisition Count
-  Wire.write(0x40); // Default is 0x80 // 0d = 13
+  Wire.write(0x0d); // Default is 0x80 // 0d = 13
   Wire.endTransmission();
 
   Wire.beginTransmission(addr);
   Wire.write(0x12); // Reference acquisition
-  Wire.write(0x05); // Count of 3 (default is 5)
+  Wire.write(0x03); // Count of 3 (default is 5)
   Wire.endTransmission(); 
 
   delay(500); // delay to prepare ESC
@@ -106,10 +112,18 @@ void setup() {
 
 void loop() {
   // speed control, analog
-  
-  int escSpeed = analogRead(0);
-  escSpeed = map(escSpeed, 0, 1023, 1000, 1500); // map values from A0 to ESC
+  int kp = analogRead(0);
+ // int escSpeed = 
+  //Serial.println(rotFreq);
+  kp = map(kp, 0, 1023, 0, 10); // map values from A0 to ESC
+  error = setValue - rotFreq;
+  errorSum = error + errorSum;
+ // Serial.println(error);
+  escSpeed = escSpeed + error*kp; + 0.1*errorSum;
+ //  Serial.println(escSpeed);
   esc.write(escSpeed);
+
+  
   // take one reading biased, 99 unbiased
   for (int i = 0; i < 100; i++) {
     thisTime = micros();
