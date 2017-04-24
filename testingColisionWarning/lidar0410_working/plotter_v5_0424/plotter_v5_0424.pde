@@ -56,7 +56,7 @@ class Zone {
     return lastMinDist;
   }
   boolean proximityWarning() {
-    if (lastMinDist < 30)
+    if (lastMinDist < 10)
       return true;
     else {
       return false;
@@ -119,7 +119,7 @@ int hypoLines=200;
 int lastInlineCount= 0;
 int hypoLinesCount = 0;
 int dataPoints2Ransac = 30;
-int acqusitions=200;
+int acqusitions=150;
 
 
 //The zones
@@ -131,7 +131,6 @@ Zone zoneE;
 Zone zoneF; 
 Zone zoneG; 
 Zone zoneH;
-
 
 // radius and angle from serial
 float angle=0, distance=0;
@@ -146,6 +145,7 @@ Timer timer1;
 // string,text related
 String toPrint="null";
 
+PShape pieDraw; 
 
 void setup() { 
   size(700, 700); 
@@ -168,151 +168,33 @@ void setup() {
   zoneE = new Zone (1.25*PI, 1.5*PI, "Zone E"); 
   zoneD = new Zone (1.5*PI, 1.75*PI, "Zone D"); 
   zoneC = new Zone (1.75*PI, 2*PI, "Zone C");
+
 } 
 
 
+
+
+
 void draw() { 
-  
-  // derive frequency
-
-  if (timer1.getTime() > 1000) {
-    toPrint = str(freqCnt);
-    freqCnt = 0;
-    timer1.reset();
-  }
-
-  translate(width/2, height/2);
-  stroke(#575A59);
-  fill(#D83497);
-  ellipseMode(CENTER);
-
-  stroke(#D83497);
-  fill(#D83497);
-  
-  // start curent pie draw
-
-  if (distanceList.size()>acqusitions) {
-    
-    background(#000000);
-    // blacken aquisitioned things
-      //ellipseMode(RADIUS);
-      //fill(#000000);
-      //stroke(#000000);
-      //arc(0, 0, 350,350,angleList.get(0), angleList.size()-1);
-      
-    stroke(#0a1528);
-    //Zone-lines
-    line(-width, 0, width, 0); //Centerline
-    line(0, height, 0, -height); 
-    line(-width, -height, width, height); 
-    line(width, -height, -width, height); 
-    //Zone text
-    fill(255);
-    textAlign(CENTER);
-
-    //Zone text, might wanna change to dynamic numbers --
-    text("Zone A", 50, (-(height/2))+40);
-    text("Zone B", (width/2)-40, -80);
-    text("Zone C", (width/2)-40, 80);
-    text("Zone D", 50, (height/2)-40);
-    text("Zone H", -50, (-(height/2))+40);
-    text("Zone G", -((width/2)-40), -80);
-    text("Zone F", -((width/2)-40), 80);
-    text("Zone E", -50, (height/2)-40);
-
-    // -- Line mode --
-    /*
-    float lastX = 0;
-    float lastY = 0; 
-
-    for (int i=0; i < distanceList.size(); i++) {
-      float lineX = (distanceList.get(i) * cos(angleList.get(i)));
-      float lineY = -(distanceList.get(i) * sin(angleList.get(i)));
-      line(lineX, lineY, lastX, lastY);
-      lastX = lineX;
-      lastY = lineY;
-    }
-    */
-
-
-    stroke(#1c1c1c);
-    ellipseMode(CENTER);
-    ellipse(0, 0, 10, 10);
-    noFill();
-    ellipse(0, 0, 200, 200);
-    ellipse(0, 0, 400, 400);
-    ellipse(0, 0, 800, 800);
-    stroke(#D83497);
-
-    //LowestDist, Collision, angle for Zone B
-    text("D: "+ zoneB.getLowestDist(), 200, -120);  
-    if (zoneB.collisionOrNot()) {
-      text(zoneB.getName() + " Collision!", 150, -100);
-    }
-    text("A: "+ zoneB.getLowestAngle() *( 180 / PI), 250, -150);
-
-
-    //LowestDist, Collision, angle for Zone F
-    text("D: "+ zoneF.getLowestDist(), -250, 120); 
-    if (zoneF.collisionWithDelay()) { 
-      text(zoneF.getName() + " Collision!", -150, 100);
-    }
-    text("A: " + zoneF.getLowestAngle() *( 180 / PI), -200, 150);
-    
-    //Proximity warning Zone F
-    if (zoneF.proximityWarning()) {
-      textSize(70);
-      text("Zone F proximity warning", 0, 0);
-      textSize(12);
-    }
-
-    //Collision for Zone E
-    zoneE.getLowestDist(); 
-    if (zoneE.collisionWithDelay()) {
-      text(zoneE.getName() + " Collision!", -100, 300);
-    }
-    zoneE.getLowestAngle(); 
-
-
-
-
-    stroke(#53F53B);
-    for (int i=0; i < distanceList.size(); i++) {
-      
-
-
+    translate(width/2, height/2);
+  // create pie to draw
+   if(angleList.size()>0){
+   pieDraw = createShape();
+   pieDraw.beginShape(TRIANGLE_STRIP);
+   pieDraw.stroke(#FFFFFF);
+   for (int i=0; i < angleList.size(); i++){
       float x = (distanceList.get(i) * cos(angleList.get(i)));
       float y = -(distanceList.get(i) * sin(angleList.get(i)));
-      ellipseMode(RADIUS);
-      ellipse(x, y, 1.5, 1.5);
-      //arc(0, 0, x, x, y, y+0.05);
-      //point(x,y);
-      
-      strokeWeight(1);
-      //println(distanceList.size());
-      inPvectorList.add(new PVector(x,y));
-       //println(inPvectorList.size());
-     if(i%dataPoints2Ransac == 1){
-        
-      // //println("first inpv size" + inPvectorList.size());
-       pvectorListRansac = getRansac(inPvectorList);
-       stroke(#cceeff);
-       // line(pvectorListRansac.get(0).x,pvectorListRansac.get(0).y,pvectorListRansac.get(1).x,pvectorListRansac.get(1).y);
-        stroke(#53F53B);
-      }  
+      vertex(x,y);
     }
-
-
-
+    pieDraw.endShape();
+    shape (pieDraw, 6, 4);
+   }
     distanceList.clear();
     angleList.clear();
-  }
+  
 
-  fill(0); 
-  rectMode(CENTER);
-  rect(-350, 350, 50, 50);
-  fill(255);                 
-  text(toPrint, -340, 350);  //Prints freq update
+
 } 
 
 
