@@ -65,7 +65,7 @@ word storedLoc;
 boolean started = false;
 boolean nmtStarted = false;
 
-float setValue = 3.0;
+float setValue = 4.0;
 float error=0;
 int errorSum = 0;
 
@@ -99,13 +99,18 @@ void setup() {
 
   Wire.beginTransmission(addr);
   Wire.write(0x02); // Acquisition Count
-  Wire.write(0x0d); // Default is 0x80 // 0d = 13
+  Wire.write(0x20); // Default is 0x80 // 0d = 13
   Wire.endTransmission();
 
   Wire.beginTransmission(addr);
   Wire.write(0x12); // Reference acquisition
   Wire.write(0x03); // Count of 3 (default is 5)
   Wire.endTransmission(); 
+
+//  Wire.beginTransmission(addr);
+//  Wire.write(0x1c); // Reference acquisition
+//  Wire.write(0x60); // Count of 3 (default is 5)
+//  Wire.endTransmission(); 
 
   delay(500); // delay to prepare ESC
 }

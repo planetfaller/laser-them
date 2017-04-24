@@ -119,7 +119,7 @@ int hypoLines=200;
 int lastInlineCount= 0;
 int hypoLinesCount = 0;
 int dataPoints2Ransac = 30;
-int acqusitions=200;
+int acqusitions=250;
 
 
 //The zones
