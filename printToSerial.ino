@@ -6,12 +6,7 @@
 
 void printToSerial() {
   String toPrint;
-  toPrint = String(storedDist, DEC)+",";
-  // toPrint = String(rFreq, 2);
-  
-  if (counter>1){
-    //Serial.flush();
-    Serial.println(toPrint);
+  toPrint = String(storedDist, DEC)+","; // concatenating stuff to print
+  Serial.print(toPrint);
   // Serial.print(String(timerOne.getTime(), DEC) + ","); // debug
-  }
 }

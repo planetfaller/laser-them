@@ -45,7 +45,7 @@ int timestoPrint[100];
 unsigned long zCTime,lZCTime;
 float rFreq=0;
 boolean zCToggle;
-
+boolean interruptToggled = false;
 
 
 // ESC, reglersystem variables
@@ -91,7 +91,7 @@ void setup() {
 
   // INIT ISR
 
-  // attachInterrupt(1, zCISR, FALLING); // attatch interrupt pin, ISR and edge
+  attachInterrupt(1, zCISR, FALLING); // attatch interrupt pin, ISR and edge
 
   // INIT ESC AND PI
 
@@ -129,7 +129,7 @@ void loop() {
 //                    delay(500);
 //                    counter=0;
 //                    }
-    counter++;
+    
 
   }
 }
