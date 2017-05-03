@@ -7,8 +7,11 @@
 void printToSerial() {
   String toPrint;
   toPrint = String(storedDist, DEC)+",";
+  // toPrint = String(rFreq, 2);
+  
   if (counter>1){
-    Serial.print(toPrint);
+    //Serial.flush();
+    Serial.println(toPrint);
   // Serial.print(String(timerOne.getTime(), DEC) + ","); // debug
   }
 }
