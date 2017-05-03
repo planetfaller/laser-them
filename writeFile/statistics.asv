@@ -1,0 +1,13 @@
+filename = 'data.dat';
+data = csvread(filename);
+nbins=10;
+bins = 20;
+
+data =
+h = histfit(data,bins)
+
+std(data)
+max(data)
+min(data)
+mean(data)
+
