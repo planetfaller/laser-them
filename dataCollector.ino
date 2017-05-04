@@ -30,34 +30,34 @@ class Timer
 #define escPin 5 // ESC pin
 #define interruptPin 3 // interrupt for HALL sensor
 
-
+// MATH
 const float pi = 3.14; // PI
-byte somethingRead[100];
-byte byteOne, byteTwo;
-int byteCon[100];
-byte confirmByte = 255;
-int counter = 0;
-word storedDist;
-int timestoPrint[100];
 
-// Velcoity and rot position variables;
+//LIDAR I2C VAR
+
+byte byteOne, byteTwo;
+byte confirmByte = 255;
+word distance,angPos;
+
+// VELOCITY AND POSITION
 
 unsigned long zCTime,lZCTime;
-float rFreq=0;
+float angVel=0;
 boolean zCToggle;
-boolean interruptToggled = false;
+volatile boolean interruptToggled = false;
 
-
-// ESC, reglersystem variables
+// ESC // debug not used
 
 Servo esc; // instanciate server object
 int setVal=3.0; // setpoint rotation [Hz]
 int errorSum=0; // lastError
 int kp=5; // gain
-int escSpeed=1000;
+int escSpeed=1350;
 
 // Time related 
-Timer timerOne;
+unsigned long timestamp=0;
+unsigned long lastTimeStamp=0;
+unsigned int timeDiff=0;
 
 void setup() {
   // INIT SERIAL
@@ -84,7 +84,7 @@ void setup() {
   Wire.write(0x03); // Count of 3 (default is 5)
   Wire.endTransmission();
 
-  //  Wire.beginTransmission(addr);
+  //  Wire.beginTransmission(addr); // make it faster
   //  Wire.write(0x1c); // Reference acquisition
   //  Wire.write(0x60); // Count of 3 (default is 5)
   //  Wire.endTransmission();
@@ -96,14 +96,16 @@ void setup() {
   // INIT ESC AND PI
 
   esc.attach(escPin);
-  esc.write(escSpeed); // reset ESC by writing 1000 microseconds
+  esc.write(1000); // reset ESC by writing 1000 microseconds
 
-// DELAY STUFF
+// DELAY STUFF TO GIVE IT TIME TO START
 
-  delay(2000);
-  escSpeed = 1200;
+  delay(1000);
+  for(int i=1000; i < escSpeed; i++){
+    esc.write(i);
+    delay(10);
+  }
   esc.write(escSpeed);
-  delay(3000);
 }
 
 void loop() {
@@ -111,27 +113,14 @@ void loop() {
   
   // take one reading biased, 99 unbiased
   for (int i = 0; i < 100; i++) {
-    timerOne.reset();
     if (i == 0) {
       readDistance(true);
     }
     else {
       readDistance(false);
     }
-//              Serial.print(String(timerOne.getTime(), DEC) + ","); // debug timer
-//              timestoPrint[counter] = timerOne.getTime();
-//                  if (counter>100){
-//                    for(int i=0;i<100;i++){
-//                    Serial.println(timestoPrint[i]);
-//              
-//              
-//                    }
-//                    delay(500);
-//                    counter=0;
-//                    }
-    
 
-  }
+}
 }
 
 

@@ -20,27 +20,14 @@ void readDistance(boolean biasMode) {
   
   //Write last measurements bytes Serial
   printToSerial();
+  
+  // update rotation speed/position and ESC
 
   if (interruptToggled){
-  // calculate difference from last zero crossing and convert to seconds
-  unsigned long zCTDiff = zCTime - lZCTime;
-  rFreq = 1/((zCTDiff)/1000000.0); // rotFreq gets calculated and stored
-
-  lZCTime = zCTime;
-  // escUpdate();
-  
-  float error = setVal - rFreq;
-  errorSum = error + errorSum;
-  escSpeed = (int)(escSpeed + error*kp + 0.05*errorSum);
- //  Serial.println(escSpeed);
-  if(escSpeed > 1600 || escSpeed < 1000){
-    escSpeed = 1600;
+    angVelFun(); // call to update 
+    // escUpdate(); // call to update speed  
+    interruptToggled = false; // we dealt with interrupt
   }
-  esc.write(escSpeed);
-  interruptToggled = false;
-  }
-
-
 
   // write to 0x01, read one byte, break out when LSB is 0
   do {
@@ -49,8 +36,16 @@ void readDistance(boolean biasMode) {
     Wire.beginTransmission(addr);
     Wire.write(0x01);
   } while (confirmByte & 1); // wait for LIDAR to complete reading
+  
+   timestamp = micros(); // collect timestamp
+   timeDiff = timestamp - lastTimeStamp;
+   lastTimeStamp = timestamp;
+
+  
+  angPosFun(); // call to update angular position
 
 
+  
   // read two bytes from 0x8f when reading is confirmed
 
   Wire.beginTransmission(addr);
@@ -61,7 +56,7 @@ void readDistance(boolean biasMode) {
   byte byteOne = Wire.read();
   byte byteTwo = Wire.read();
 
-  storedDist = (byteOne << 8) + byteTwo; // shift first byte left and concatenade
+  distance = (byteOne << 8) + byteTwo; // shift first byte left and concatenade
   
   Wire.endTransmission();
 }
