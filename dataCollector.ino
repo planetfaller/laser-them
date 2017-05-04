@@ -3,13 +3,11 @@
 class Timer
 {
     unsigned long startTime;
-    boolean timerOn;
 
     // constructor
   public:
     Timer() {
       startTime = micros();
-      timerOn = true;
     }
     // void method to get time, returns unsigned long
     unsigned long getTime() {
@@ -18,6 +16,7 @@ class Timer
     // void method to get time, returns unsigned long
     void reset() {
       startTime = micros();
+      this.timerOn = true;
     }
 
 };
