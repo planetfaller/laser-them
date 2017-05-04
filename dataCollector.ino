@@ -16,7 +16,6 @@ class Timer
     // void method to get time, returns unsigned long
     void reset() {
       startTime = micros();
-      this.timerOn = true;
     }
 
 };

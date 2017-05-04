@@ -1,5 +1,7 @@
 filename = 'data.dat';
 data = csvread(filename);
+
+
 nbins=10;
 bins = 16;
 

@@ -5,15 +5,16 @@ import processing.serial.*;
 
 PrintWriter output;
 
+
 // FOR SERIAL READ
 
 Serial comPort;    // The serial port
 String inString;  // Input string
-int lf = 84;      // ASCII delimiter ","
+int lf = 44;      // ASCII delimiter ","
 
 // DECLARE FOR TEMPORARY STORAGE OF READINGS
 
-FloatList distance,position,timestamp;
+ArrayList<String> serialReadings;
 int counter=0;
 int  numberOfMeasurements=1000; 
 
@@ -23,7 +24,8 @@ void setup() {
   
   // Create a new file in the sketch directory
   output = createWriter("data.dat"); 
-  
+
+   
   // SERIAL INIT
 
   comPort = new Serial(this, Serial.list()[0], 115200);
@@ -31,32 +33,38 @@ void setup() {
 
   // INIT OF STORE TEMPORAL
   
-  distance = new FloatList(); 
-  
+  serialReadings = new ArrayList<String>(); 
+
 }
 
 void draw() {
-  for (int i=0; i < distance.size()-1; i++){
-      output.print(distance.get(i) + ","); // gets written to file
-      print(distance.get(i) + ","); // gets written on screen
-}
-  distance.clear();
+  int dataSize = serialReadings.size()-1;
+  for (int i=1; i < dataSize; i++){
+      output.print(serialReadings.get(i) + ","); // gets written to file
+        String data[] = split(serialReadings.get(i), '@');
+        println(data[0]);
+        println(data[1]);
+        println(data[2]);
+  }
+  serialReadings.clear();
 }
 
 void serialEvent(Serial p) { 
   try {
-    inString = p.readStringUntil('T');
-        String data[] = split(inString, 'D'); // splits into substrings for relevant values
-        String data1[] = split(data[1], 'P'); 
-        String data2[] = split(data1[1], 'T'); 
-        distance.append(float(data2[0])); // choose value here
-        p.clear();
-        counter++;
+    
+    counter++;
+    
+    if(counter>0){
+    inString = p.readStringUntil(',');
+        String data[] = split(inString, ',');
+        serialReadings.add(data[0]);
+         
         if(counter>numberOfMeasurements-1){
           output.flush();  // Writes the remaining data to the file
           output.close();  // Finishes the file
           exit();  // Stops the program
         }
+    }
   }
   catch(RuntimeException e) {
   }
