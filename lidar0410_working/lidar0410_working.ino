@@ -27,8 +27,8 @@ class Timer
 #include <Servo.h> // Servo library, for writing to ESC and controlling speed of motor 
 
 #define addr 0x62 // I2C address to LIDAR
-#define interruptPin 2 // interrupt for HALL sensor
-#define escPin 6 // ESC for motor 
+#define interruptPin 3 // interrupt for HALL sensor
+#define escPin 5 // ESC for motor 
 
 const float pi = 3.14; // PI
 byte somethingRead[100];
@@ -43,6 +43,8 @@ unsigned long highestTime = 0; //For debugging
 word tmpDist;
 unsigned long timeDiffer;
 
+int angOffset = 340;
+
 byte dummyData[4];
 int mCountToPrint;
 int mCount=0;
@@ -54,7 +56,7 @@ unsigned long totalLoopTime;
 int counter = 0;
 
 Timer timerOne;
-float rotFreq;
+float rotFreq=0;
 unsigned long zeroCrossingTime = 0;
 unsigned long lastZeroCrossingTime = 0;
 boolean lastBiasMode = false;
@@ -62,6 +64,12 @@ word storedDist;
 word storedLoc;
 boolean started = false;
 boolean nmtStarted = false;
+
+float setValue = 3.0;
+float error=0;
+int errorSum = 0;
+
+int escSpeed=1000;
 
 // using integers for storing readings, might want to use float
 
@@ -75,13 +83,13 @@ volatile boolean flag = false;
 Servo esc;
 
 void setup() {
-  attachInterrupt(0, zeroCrossing, FALLING); // attatch interrupt pin, ISR and edge
+  attachInterrupt(1, zeroCrossing, FALLING); // attatch interrupt pin, ISR and edge
   esc.attach(escPin);
   esc.write(1000); // reset ESC by writing 1000 microseconds
   Serial.begin(115200); // serial baud rate
   Wire.begin(addr); // initialize i2c
   Wire.setClock(400000L); // set i2c clock speed
-
+ 
   Wire.beginTransmission(addr);
   Wire.write(0x04); // register to write
 
@@ -91,23 +99,42 @@ void setup() {
 
   Wire.beginTransmission(addr);
   Wire.write(0x02); // Acquisition Count
-  Wire.write(0x10); // Default is 0x80 // 0d = 13
+  Wire.write(0x20); // Default is 0x80 // 0d = 13
   Wire.endTransmission();
 
   Wire.beginTransmission(addr);
   Wire.write(0x12); // Reference acquisition
   Wire.write(0x03); // Count of 3 (default is 5)
-  Wire.endTransmission();
+  Wire.endTransmission(); 
 
-  delay(1000); // delay to prepare ESC
+//  Wire.beginTransmission(addr);
+//  Wire.write(0x1c); // Reference acquisition
+//  Wire.write(0x60); // Count of 3 (default is 5)
+//  Wire.endTransmission(); 
+
+  delay(2000); // delay to prepare ESC
+
 }
 
 void loop() {
   // speed control, analog
+ // int kp = analogRead(0);
+  int kp = 5;
+ // int escSpeed = 
+  //Serial.println(rotFreq);
+  //kp = map(kp, 0, 1023, 0, 10); // map values from A0 to ESC
+  error = setValue - rotFreq;
+  errorSum = error + errorSum;
+ // Serial.println(error);
+  escSpeed = escSpeed + error*kp; + 0.01*errorSum;
+ //  Serial.println(escSpeed);
+  if(escSpeed > 1400){
+    escSpeed = 1400;
+  }
   
-  int escSpeed = analogRead(0);
-  escSpeed = map(escSpeed, 0, 1023, 1000, 1500); // map values from A0 to ESC
   esc.write(escSpeed);
+
+  
   // take one reading biased, 99 unbiased
   for (int i = 0; i < 100; i++) {
     thisTime = micros();

@@ -4,5 +4,5 @@
  */
 
 void angLoc() {
-  storedLoc = 360*rotFreq*((micros() - zeroCrossingTime)/1000000.0); // angular location measurement
+  storedLoc = (360*rotFreq*((micros() - zeroCrossingTime)/1000000.0)); // angular location measurement
 }
