@@ -30,7 +30,7 @@ void setup() {
 
   // SERIAL INIT
 
-  comPort = new Serial(this, Serial.list()[1], 115200);
+  comPort = new Serial(this, Serial.list()[0], 115200);
   comPort.bufferUntil(lf);
 
   // INIT OF STORE TEMPORAL
@@ -52,22 +52,25 @@ void draw() {
   background(#000000);
   translate(width/2, height/2);
   
-        if(pointGroup.getChildCount() > 360){
+        if(pointGroup.getChildCount() > 330){
             for (int i=1; i < serialReadings.size()-2; i++) {
             pointGroup.removeChild(0);
             }
           }
       
       if (serialReadings.size()>20){
+        println(serialReadings.size());
         for(int i=0; i<serialReadings.size()-2;i++){
-          println(serialReadings.get(i));
+          // println(serialReadings.get(i));
           String data[] = split(serialReadings.get(i), '@');
-          float x = (cos(radians(float(data[1])))*float(data[0])); // gets written to file
-          float y = (sin(radians(float(data[1])))*float(data[0])); // gets written to file  
-          PShape rectangle = createShape(RECT, x, y, 4, 4);
-          rectangle.setFill(false);
-          rectangle.setStroke(color(#0CF015)); // change color for outline
-          pointGroup.addChild(rectangle); // add to grouped
+          if(data.length==3){
+            float x = (cos(radians(float(data[1])))*float(data[0]));
+            float y = (sin(radians(float(data[1])))*float(data[0]));  
+            PShape rectangle = createShape(RECT, x, y, 4, 4);
+            rectangle.setFill(#FFFFFF);
+            rectangle.setStroke(color(#FFFFFF)); // change color for outline
+            pointGroup.addChild(rectangle); // add to grouped
+          }
         }
         serialReadings.clear();
       }
@@ -77,7 +80,7 @@ void draw() {
 void serialEvent(Serial p) { 
   try {
         wait++;
-    if (wait>10){
+    if (wait>100){
     inString = p.readStringUntil(',');
     String data[] = split(inString, ',');
         serialReadings.add(data[0]);
