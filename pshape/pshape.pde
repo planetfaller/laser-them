@@ -30,7 +30,7 @@ void setup() {
 
   // SERIAL INIT
 
-  comPort = new Serial(this, Serial.list()[0], 115200);
+  comPort = new Serial(this, Serial.list()[1], 115200);
   comPort.bufferUntil(lf);
 
   // INIT OF STORE TEMPORAL
@@ -45,52 +45,44 @@ void setup() {
   
     // initate shape group
   pointGroup = createShape(GROUP);
+  
 }
 
 void draw() {
   background(#000000);
   translate(width/2, height/2);
-  //println("number of" + children);
-  int dataSize = serialReadings.size()-1;
-  //println("size of incoming" + dataSize);
-  if(children > 100){
-    for (int i=1; i < dataSize; i++) {
-      pointGroup.removeChild(0);
-    }
-  }
   
-  if(dataSize > 0){
-  for (int i=1; i < dataSize; i++) {   
-     println(serialReadings.get(i));      
-      String data[] = split(serialReadings.get(i), '@');
-      float x = (cos(radians(float(data[1])))*float(data[0])); // gets written to file
-      float y = (sin(radians(float(data[1])))*float(data[0])); // gets written to file  
-    // println(data[2]); // gets written to file
-
-    PShape rectangle = createShape(RECT, x, y, 4, 4);
-    rectangle.setFill(false);
-    rectangle.setStroke(color(#0CF015)); // change color for outline
-    pointGroup.addChild(rectangle); // add to grouped
-    
-  }
-  children = pointGroup.getChildCount(); // store current number of childre
-  }
-  serialReadings.clear();
-  shape(pointGroup);
+        if(pointGroup.getChildCount() > 360){
+            for (int i=1; i < serialReadings.size()-2; i++) {
+            pointGroup.removeChild(0);
+            }
+          }
+      
+      if (serialReadings.size()>20){
+        for(int i=0; i<serialReadings.size()-2;i++){
+          println(serialReadings.get(i));
+          String data[] = split(serialReadings.get(i), '@');
+          float x = (cos(radians(float(data[1])))*float(data[0])); // gets written to file
+          float y = (sin(radians(float(data[1])))*float(data[0])); // gets written to file  
+          PShape rectangle = createShape(RECT, x, y, 4, 4);
+          rectangle.setFill(false);
+          rectangle.setStroke(color(#0CF015)); // change color for outline
+          pointGroup.addChild(rectangle); // add to grouped
+        }
+        serialReadings.clear();
+      }
+      shape(pointGroup);
 }
 
 void serialEvent(Serial p) { 
   try {
-    wait++;
+        wait++;
     if (wait>10){
     inString = p.readStringUntil(',');
     String data[] = split(inString, ',');
-    serialReadings.add(data[0]);
-    }
-    else{
-     //  p.clear();
-    }
+        serialReadings.add(data[0]);
+    }  
   }
-  catch(RuntimeException e) {
+    catch(RuntimeException e) {
   }
 }
