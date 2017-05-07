@@ -1,14 +1,28 @@
 FloatList xList;
 FloatList yList;
-int eps = 100;
-int minPts = 5;
-
+int eps = 70; // epsilon, condition distance p2p to form cluster
+int minPts = 3; // minimum points to form a closter > 3
+  
+color[] colorList = new color[100];
 
 void setup() {
   size(1000, 1000);
   xList = new FloatList();
   yList = new FloatList();
-  for(int i=0;i<50;i++){
+  
+  
+
+  
+  
+  for (int i=0;i<100; i++){
+    colorList[i] = color(random(0,255), random(0,255), random(0,255));
+  // println(colorList[i]);
+  }
+}
+
+void draw() {
+  background(#000000);
+    for(int i=0;i<50;i++){
     xList.append(random(0,200));
     yList.append(random(0,200));
   }
@@ -17,27 +31,40 @@ void setup() {
     xList.append(random(800,1000));
     yList.append(random(800,1000));
   }
-
   
-}
-
-void draw() {
-  background(#000000);
-  stroke(#FFFFFF);
+     for(int i=0;i<50;i++){
+    xList.append(random(300,400));
+    yList.append(random(300,400));
+  }
+  
+       for(int i=0;i<50;i++){
+    xList.append(random(700,800));
+    yList.append(random(200,600));
+  }
+  
+ for(int i=0;i<10;i++){
+    xList.append(random(0,1000));
+    yList.append(random(0,1000));
+  }
+  
   int[] cluster = new int[100];
   cluster = DBSCAN();
-  colorMode(HSB);
-  for(int i=0;i<100;i++){
-
-    fill(100, cluster[i]*20, 100);
+  for(int i=0;i<210;i++){
     
+    fill(colorList[cluster[i]]);
     noStroke();
+    if (cluster[i]!=0){
     rect(xList.get(i), yList.get(i),10,10);
+    }
+    else{
+    ellipse(xList.get(i), yList.get(i),20,20);
+    }
   }
   // DBSCAN();
   println(DBSCAN());
-  
-  
+  xList.clear();
+  yList.clear();
+  // delay(500);
 }
 
 int[] DBSCAN(){
@@ -63,16 +90,17 @@ int[] DBSCAN(){
     }
   }
   
+ // go through all points in set
   for(int i=0; i < n; i++){
-    if(!visited[i]){
-      visited[i] = true;
-        neighbors = regionQuery(i,d); // collect neighborpoints
-      if(neighbors.size()<minPts){
-        isNoise[i] = true;
+    if(!visited[i]){ // if not visited
+      visited[i] = true; // set as visited
+        neighbors = regionQuery(i,d); // collect which points are close enough
+      if(neighbors.size()<minPts){ // check for min points conditions
+        isNoise[i] = true; // mark as noise if true
        }
     else{
-      C++;
-      IDX = expandCluster(IDX,i, neighbors,C, visited, d);
+      C++; // it has a minimum amount of neighbors, and is a core point, we add a cluster
+      IDX = expandCluster(IDX,i, neighbors,C, visited, d); // call to expander function, it gets the neighbors, visited points and distance
     }
     }
    }
@@ -112,10 +140,10 @@ int[] expandCluster(int[] IDX,int i, IntList neighbors, int C, boolean[] visited
 
   
 IntList regionQuery(int row,float[][]d){
-  IntList neighbors = new IntList();
+  IntList neighbors = new IntList(); // we create a list to mark which points that are dense enough
   for(int i=0; i<xList.size(); i++){
     if(d[row][i]<=eps){
-      neighbors.append(i);
+      neighbors.append(i); // if close enough we add it
     }    
    }
   return neighbors; // return the intlist with neighbors
@@ -123,7 +151,3 @@ IntList regionQuery(int row,float[][]d){
 
   
   
-
-  
-    
-// dist(x1, y1, x2, y2)
