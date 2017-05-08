@@ -5,7 +5,7 @@
  */
 
 import processing.serial.*; 
-import controlP5.*;
+import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
 
 ControlP5 cp5;
 
