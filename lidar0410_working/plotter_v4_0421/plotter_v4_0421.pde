@@ -21,7 +21,7 @@ int lf = 44;      // ASCII delimiter ","
 
 // FOR OFFSET IN PLOTTER
 float angleOffset = 0;
-float distanceOffset = 0;
+float distanceOffset = 700;
 
 // DECLARE FOR TEMPORARY STORAGE OF READINGS
 FloatList distance, position, timestamp;
@@ -65,9 +65,9 @@ void setup() {
      .setSize(100, 10);
      
       cp5.addSlider("DistanceOffsetSlider")
-     .setRange(-500, 500)
+     .setRange(1, 2000)
      .setCaptionLabel("Distance Offset")
-     .setValue(0)
+     .setValue(700)
      .setPosition(0, height-60)
      .setSize(100, 10);
 
@@ -107,7 +107,9 @@ void draw() {
       if (data.length==3) {
 
         //CREATE POINT OBJECT WITH CURRENT DATA
-        Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))+distanceOffset), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))+distanceOffset), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
+        data[0] = Float.toString(map(float(data[0]), 0, 1000, 0, distanceOffset));
+   
+        Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
         // ADD POINT OBJECT TO ARRAYLIST
         pointArray.add(pointObject);
         
