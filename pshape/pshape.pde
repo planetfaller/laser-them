@@ -52,7 +52,7 @@ void draw() {
   background(#000000);
   translate(width/2, height/2);
   
-        if(pointGroup.getChildCount() > 330){
+        if(pointGroup.getChildCount() > 300){
             for (int i=1; i < serialReadings.size()-2; i++) {
             pointGroup.removeChild(0);
             }
@@ -63,12 +63,15 @@ void draw() {
         for(int i=0; i<serialReadings.size()-2;i++){
           // println(serialReadings.get(i));
           String data[] = split(serialReadings.get(i), '@');
+          
+          
           if(data.length==3){
             float x = (cos(radians(float(data[1])))*float(data[0]));
             float y = (sin(radians(float(data[1])))*float(data[0]));  
             PShape rectangle = createShape(RECT, x, y, 4, 4);
-            rectangle.setFill(#FFFFFF);
-            rectangle.setStroke(color(#FFFFFF)); // change color for outline
+            rectangle.setFill(color(random(255), random(255), random(255), random(255)));
+            rectangle.setStroke(color(random(255), random(255), random(255), random(255))); // change color for outline
+            rectangle.setStroke(#0BAF00); // change color for outline
             pointGroup.addChild(rectangle); // add to grouped
           }
         }
