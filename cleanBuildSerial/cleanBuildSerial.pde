@@ -21,7 +21,7 @@ int lf = 44;      // ASCII delimiter ","
 FloatList distance, position, timestamp;
 int counter=0;
 ArrayList<String> serialReadings;
-
+int maxNumberOfPoints=360;
 
 // COLORS AND GUI
 
@@ -38,6 +38,12 @@ float distanceOffset = 1;
 // FOR COMPARETO
 
 int xory=0; // Sort ascending X/Y. 0/1
+
+ // FOR BUTTONS AND GUI
+ 
+ PShape b1,b2,b3,b4,b5,b6;
+ PShape buttonGroup;
+
 
 void setup(){
   size(1000,1000); // canvas size
@@ -74,19 +80,29 @@ void setup(){
   
  //SERIAL INIT
    
-  comPort = new Serial(this, Serial.list()[0], 115200);
+  comPort = new Serial(this, Serial.list()[1], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
  
-   
-   
-  // FOR SIMULATION 
-  
+ // FOR BUTTONS
+ buttonGroup = createShape(GROUP);
+ 
+ b1 = createShape(RECT,0,0,80,80);
+ b1.setStroke(#FFFFFF);
+ b1.setFill(bgColor);
+ buttonGroup.addChild(b1);
+ 
+ b2 = createShape(RECT,80,0,80,80);
+ b2.setStroke(#FFFFFF);
+ b2.setFill(bgColor);
+ buttonGroup.addChild(b2);
+ 
 }
 
 void draw(){
   background(bgColor); // background color
   translate(width/2, height/2); // translate origin to middle
+  
   int paSize = pointArray.size(); // store the size for use 
   
   dealWithSerial(); // DO IT
@@ -127,6 +143,10 @@ for(int j=1; j< clusterCount-1;j++){ // minus one
   }
  }
 // END OF FILE
+  
+  translate(-width/2,-height/2);
+  println(b2.getVertexCount());
+  shape(buttonGroup);
 
 }
 
@@ -221,13 +241,22 @@ float xmin=dbArray.get(0).getX();
     strokeWeight(4);
     stroke(colorList[800]);
     line(xb1,yb1,xb2,yb2);
+  
+
 }
+
+
+// BUTTONS
+
+void drawButtons(){
+
+}
+
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
 
-
 void dealWithSerial(){
-  if (pointArray.size() > 125) {
+  if (pointArray.size() > maxNumberOfPoints) {
     for (int i=1; i < serialReadings.size()-2; i++) {
       pointArray.remove(0);
     }
@@ -267,3 +296,12 @@ void serialEvent(Serial p) {
   catch(RuntimeException e) {
   }
 }
+
+//boolean overButton()  {
+ // if (mouseX >= b1.getVertex(0).x && mouseX <= b1.getVertex(0).x && 
+   //   mouseY >= b1.getVertex(0).y && mouseY <= b1.getVertex(0).y) {
+   // return true;
+ // } else {
+ //   return false;
+ // }
+//}
