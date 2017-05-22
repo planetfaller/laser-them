@@ -12,7 +12,7 @@ import processing.serial.*;
 
 // COUNTS
 
-long timeCounter=0;
+float timeCounter=0;
 int pointCounter=0;
 int errorCounter = 0;
 float lastAngle = 0;
@@ -190,7 +190,7 @@ void draw() {
   float totalDistanceToMouse = map(sqrt(pow(float(yCoordinator),2) + pow(float(xCoordinator),2)),0,1000,0,distanceOffset);
   
   text(totalDistanceToMouse, -width/2, -height/2 + 550);
-  text(pointCounter, -width/2, -height/2 + 450);
+  text(pointCounter, -width/2 + 50, -height/2 + 450);
   text(rotFreq, -width/2, -height/2 + 400);
   text(1/(lastTime/1000000), -width/2, -height/2 + 350);
   text(errorCounter, -width/2, -height/2 + 600);
@@ -358,7 +358,7 @@ void dealWithSerial() {
   }
 
   if (serialReadings.size()>20) {
-    for (int i=0; i<serialReadings.size()-2; i++) {
+    for (int i=0; i<serialReadings.size()-1; i++) {
 
       String data[] = split(serialReadings.get(i), '@');
       if (data.length==3 && data != null) {
@@ -368,9 +368,12 @@ void dealWithSerial() {
         data[0] = Float.toString(map(float(data[0]), 0, 1000, 0, distanceOffset));
         float angle = float(data[1]);
         int timeDiff = int(data[2]);
-         
-         if (angle < 5 && lastAngle > 350){
-           rotFreq = timeCounter/pointCounter;
+         println(rotFreq);
+         if (angle < 10 && lastAngle > 350){
+           
+           if (timeCounter > 0){
+            rotFreq = 1/((timeCounter)/1000000);
+           }
            pointCounter = 0;
            timeCounter = 0;
            errorCounter = 0;
