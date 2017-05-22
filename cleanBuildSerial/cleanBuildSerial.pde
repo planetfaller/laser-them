@@ -9,6 +9,17 @@ import controlP5.*; // ControlP5 required install via tools --> add tools --> li
 import java.util.Collections; // For sorting
 import processing.serial.*; 
 
+
+// COUNTS
+
+long timeCounter=0;
+int pointCounter=0;
+int errorCounter = 0;
+float lastAngle = 0;
+float rotFreq=0;
+float lastTime=1000;
+
+
 // GUI
 ControlP5 cp5; 
 boolean linemodeOn;
@@ -179,7 +190,12 @@ void draw() {
   float totalDistanceToMouse = map(sqrt(pow(float(yCoordinator),2) + pow(float(xCoordinator),2)),0,1000,0,distanceOffset);
   
   text(totalDistanceToMouse, -width/2, -height/2 + 550);
-
+  text(pointCounter, -width/2, -height/2 + 450);
+  text(rotFreq, -width/2, -height/2 + 400);
+  text(1/(lastTime/1000000), -width/2, -height/2 + 350);
+  text(errorCounter, -width/2, -height/2 + 600);
+  // text(1/(timeCounter/1000000), -width/2, -height/2 + 350);
+  
   int paSize = pointArray.size(); // store the size for use 
 
   dealWithSerial(); // DO IT
@@ -206,7 +222,7 @@ void draw() {
 
     // draw some text
 
-    drawText();
+
 
     // Build individual point clouds based on cluster ID
 
@@ -348,7 +364,27 @@ void dealWithSerial() {
       if (data.length==3 && data != null) {
 
         //CREATE POINT OBJECT WITH CURRENT DATA
+        int distance = int(data[0]);
         data[0] = Float.toString(map(float(data[0]), 0, 1000, 0, distanceOffset));
+        float angle = float(data[1]);
+        int timeDiff = int(data[2]);
+         
+         if (angle < 5 && lastAngle > 350){
+           rotFreq = timeCounter/pointCounter;
+           pointCounter = 0;
+           timeCounter = 0;
+           errorCounter = 0;
+         }
+         
+         pointCounter++;
+         timeCounter = timeDiff + timeCounter;
+         lastTime = timeDiff;
+         lastAngle = angle;
+         
+         if (distance == 1){
+           errorCounter++;
+         }
+
 
         if (float(data[0]) > filterOut) {
           Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
@@ -356,6 +392,7 @@ void dealWithSerial() {
           //println(pointObject.getX());
           pointArray.add(pointObject);
           // inPointArray.add(pointObject);
+          
         }
       }
     }
