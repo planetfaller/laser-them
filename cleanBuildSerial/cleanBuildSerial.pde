@@ -21,7 +21,7 @@ int lf = 44;      // ASCII delimiter ","
 FloatList distance, position, timestamp;
 int counter=0;
 ArrayList<String> serialReadings;
-int maxNumberOfPoints=360;
+int maxNumberOfPoints=220;
 
 // COLORS AND GUI
 
@@ -31,7 +31,7 @@ color bgColor;
 
 
 // FOR OFFSET IN PLOTTER
-float angleOffset = 150;
+float angleOffset = 30;
 float distanceOffset = 1;
 
 
@@ -55,7 +55,7 @@ void setup(){
   
   // FOR DBSCAN
   
-  eps = 25; // epsilon, distance between points for cluster
+  eps = 20; // epsilon, distance between points for cluster
   minPts = 3; // minimum points to create cluster
   clusterCount=0; // how many clusters in data set
   
@@ -80,7 +80,7 @@ void setup(){
   
  //SERIAL INIT
    
-  comPort = new Serial(this, Serial.list()[1], 115200);
+  comPort = new Serial(this, Serial.list()[0], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
  
@@ -103,6 +103,8 @@ void draw(){
   background(bgColor); // background color
   translate(width/2, height/2); // translate origin to middle
   
+  
+  rect(-25,-30,50,60);
   int paSize = pointArray.size(); // store the size for use 
   
   dealWithSerial(); // DO IT
@@ -120,6 +122,9 @@ void draw(){
   
   //drawConnectedPoints();
 
+ // draw some text
+ 
+ drawText();
 
 // Build individual point clouds based on cluster ID
 
@@ -136,7 +141,7 @@ for(int j=1; j< clusterCount-1;j++){ // minus one
   
     Collections.sort(dbArray); // sort array on X ascending
     
-    drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
+    // drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
     
      drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
   }
@@ -145,7 +150,7 @@ for(int j=1; j< clusterCount-1;j++){ // minus one
 // END OF FILE
   
   translate(-width/2,-height/2);
-  println(b2.getVertexCount());
+  
   shape(buttonGroup);
 
 }
@@ -158,11 +163,13 @@ void drawPoints(){
     if(pointArray.get(i).getClusterID()==0){
       noFill();
       // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
-    }
+    
+  }
     else
     {
+      println(pointArray.get(i).getTime());
       fill(clusterColor);
-      rect(pointArray.get(i).getX(),pointArray.get(i).getY(), 5,5);
+      rect(pointArray.get(i).getX(),pointArray.get(i).getY(), 2,2);
     }  
 }
 }
@@ -248,8 +255,9 @@ float xmin=dbArray.get(0).getX();
 
 // BUTTONS
 
-void drawButtons(){
-
+void drawText(){
+  String toPrint = str(pointArray.get(0).getTime());
+  text(toPrint,400,-400);
 }
 
 

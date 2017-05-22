@@ -37,6 +37,10 @@ class Point implements Comparable<Point>
     return Y;
   }
 
+  float getTime(){
+    return timeDiff;
+  }
+  
   int getId() {
     return id;
   }
