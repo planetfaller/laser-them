@@ -9,9 +9,7 @@ import controlP5.*; // ControlP5 required install via tools --> add tools --> li
 import java.util.Collections; // For sorting
 import processing.serial.*; 
 
-
 // COUNTS
-
 float timeCounter=0;
 int pointCounter=0;
 int errorCounter = 0;
@@ -28,7 +26,10 @@ boolean pointmodeOn;
 boolean onlyPointmodeOn;
 
 int m, b, ransacHypos, ransacThreshold; // Ransac
-int eps, minPts, clusterCount; //   DBSCAN
+// DBSCAN
+int clusterCount; 
+int eps = 20;
+int minPts = 3;
 
 // DATA AND SERIAL 
 
@@ -110,9 +111,9 @@ void setup() {
     .setSize(100, 10);
 
   cp5.addSlider("DistanceOffsetSlider")
-    .setRange(1, 2000)
-    .setCaptionLabel("Distance Offset")
-    .setValue(700)
+    .setRange(0, 2)
+    .setCaptionLabel("Distance Scale")
+    .setValue(1)
     .setPosition(0, height-60)
     .setSize(100, 10);
 
@@ -172,36 +173,31 @@ void draw() {
   background(bgColor); // background color
   translate(width/2, height/2); // translate origin to middle
 
-  stroke(#ffffff);
+  stroke(100);
   noFill();
 
-  
-  ellipse(0,0,map(200,0,1000,0,distanceOffset),map(200,0,1000,0,distanceOffset));
-  fill(#ffffff);
-  rect(-25, -30, 50, 60);
-  text("Point Mode", -width/2, -height/2+15);
-  text("Cluster Mode", -width/2, -height/2+55);
-  text("Line Mode", -width/2, -height/2+95);
-  text("Ransac Mode", -width/2, -height/2+135);
 
-  int xCoordinator = mouseX - width/2;
-  int yCoordinator = mouseY - width/2;
- // float totalDistanceToMouse = sqrt(pow(float(yCoordinator),2) + pow(float(xCoordinator),2)); 
-  float totalDistanceToMouse = map(sqrt(pow(float(yCoordinator),2) + pow(float(xCoordinator),2)),0,1000,0,distanceOffset);
+  ellipse(0, 0, 200 * distanceOffset , 200 * distanceOffset);
+  ellipse(0, 0, 600 * distanceOffset , 600 * distanceOffset);
+  ellipse(0, 0, 1000 * distanceOffset , 1000 * distanceOffset);
+  ellipse(0, 0, 2000 * distanceOffset , 2000 * distanceOffset);
+ 
+  fill(100);
+  rect(-15*distanceOffset, -20*distanceOffset, 30*distanceOffset, 40*distanceOffset);
+  fill(#ffffff);
+ 
+  drawGUIText();
   
-  text(totalDistanceToMouse, -width/2, -height/2 + 550);
-  text(pointCounter, -width/2 + 50, -height/2 + 450);
-  text(rotFreq, -width/2, -height/2 + 400);
-  text(1/(lastTime/1000000), -width/2, -height/2 + 350);
-  text(errorCounter, -width/2, -height/2 + 600);
-  // text(1/(timeCounter/1000000), -width/2, -height/2 + 350);
   
+
+
+
   int paSize = pointArray.size(); // store the size for use 
 
   dealWithSerial(); // DO IT
- 
-  
-  
+
+
+
 
   if (pointArray.size() > 100) { 
 
@@ -216,12 +212,7 @@ void draw() {
       drawPoints();
     }
     // draw line connected point chart
-    if (linemodeOn) {
-      drawConnectedPoints();
-    }
-
-    // draw some text
-
+    // drawConnectedPoints();
 
 
     // Build individual point clouds based on cluster ID
@@ -239,8 +230,9 @@ void draw() {
 
         Collections.sort(dbArray); // sort array on X ascending
 
-        // drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
-
+        if (linemodeOn) {
+           drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
+        }
         if (ransacOn) {
           drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
         }
@@ -304,6 +296,8 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   float ymin = dbArray.get(0).getY();
   float ymax = dbArray.get(dbArray.size()-1).getY();
 
+
+
   xory = 0;
 
 
@@ -343,6 +337,9 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
 
   stroke(colorList[800]);
   line(xb1, yb1, xb2, yb2);
+  stroke(#ff0000);
+  noFill();
+  rect(xb1, yb1, xb2-xb1, yb2-yb1);                                                                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 
@@ -365,28 +362,28 @@ void dealWithSerial() {
 
         //CREATE POINT OBJECT WITH CURRENT DATA
         int distance = int(data[0]);
-        data[0] = Float.toString(map(float(data[0]), 0, 1000, 0, distanceOffset));
+        data[0] = Float.toString((float(data[0]) * distanceOffset));
         float angle = float(data[1]);
         int timeDiff = int(data[2]);
-         println(rotFreq);
-         if (angle < 10 && lastAngle > 350){
-           
-           if (timeCounter > 0){
+        println(rotFreq);
+        if (angle < 10 && lastAngle > 350) {
+
+          if (timeCounter > 0) {
             rotFreq = 1/((timeCounter)/1000000);
-           }
-           pointCounter = 0;
-           timeCounter = 0;
-           errorCounter = 0;
-         }
-         
-         pointCounter++;
-         timeCounter = timeDiff + timeCounter;
-         lastTime = timeDiff;
-         lastAngle = angle;
-         
-         if (distance == 1){
-           errorCounter++;
-         }
+          }
+          pointCounter = 0;
+          timeCounter = 0;
+          errorCounter = 0;
+        }
+
+        pointCounter++;
+        timeCounter = timeDiff + timeCounter;
+        lastTime = timeDiff;
+        lastAngle = angle;
+
+        if (distance == 1) {
+          errorCounter++;
+        }
 
 
         if (float(data[0]) > filterOut) {
@@ -395,7 +392,6 @@ void dealWithSerial() {
           //println(pointObject.getX());
           pointArray.add(pointObject);
           // inPointArray.add(pointObject);
-          
         }
       }
     }
@@ -464,15 +460,35 @@ void controlEvent(ControlEvent theEvent) {
 
     if (theEvent.getName() == "epsValue") {
       eps = int(theEvent.getStringValue());
-    } 
-    
-    else if (theEvent.getName() == "minPtsValue") {
+    } else if (theEvent.getName() == "minPtsValue") {
       minPts = int(theEvent.getStringValue());
-    } 
-    
-    else if (theEvent.getName() == "pointArraySizeValue") {
+    } else if (theEvent.getName() == "pointArraySizeValue") {
       maxNumberOfPoints = int(theEvent.getStringValue());
       println(pointArraySize);
     }
   }
+}
+
+void drawGUIText(){
+  text("Point Mode", -width/2, -height/2+15);
+  text("Cluster Mode", -width/2, -height/2+55);
+  text("Line Mode", -width/2, -height/2+95);
+  text("Ransac Mode", -width/2, -height/2+135);
+
+  int xCoordinator = mouseX - width/2;
+  int yCoordinator = mouseY - width/2;
+  
+  text("Distance To Mouse:", -width/2, -height/2 + 535);
+  float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
+  text(totalDistanceToMouse, -width/2, -height/2 + 550);
+  
+  text("Rotation Frequency:", -width/2, -height/2 + 385);
+  text(rotFreq, -width/2, -height/2 + 400);
+  
+  text("Update Frequency:", -width/2, -height/2 + 420);
+  text(1/(lastTime/1000000), -width/2, -height/2 + 435);
+
+  text("Number of error MS:", -width/2, -height/2 + 455);
+  text(errorCounter, -width/2, -height/2 + 470);
+
 }
