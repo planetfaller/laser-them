@@ -253,7 +253,7 @@ void drawPoints() {
     } else
     {
       fill(clusterColor);
-      rect(pointArray.get(i).getX(), pointArray.get(i).getY(), 2, 2);
+      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
     }
   }
 }
@@ -262,7 +262,7 @@ void drawPoints() {
 void drawOnlyPoints() {
   for (int i = 0; i < pointArray.size(); i++) {
     stroke(#ffffff);
-    ellipse(pointArray.get(i).getX(), pointArray.get(i).getY(), 2, 2);
+    ellipse(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
   }
 }
 
@@ -270,7 +270,7 @@ void drawOnlyPoints() {
 void drawConnectedPoints() {
   for (int i=0; i < pointArray.size()-1; i++) { // draw point connected chart
     stroke(colorList[800]);
-    line(pointArray.get(i).getX(), pointArray.get(i).getY(), pointArray.get(i+1).getX(), pointArray.get(i+1).getY());
+    line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
   }
 }
 
@@ -278,7 +278,7 @@ void drawConnectedPoints() {
 void drawClusterConnectedPoints(ArrayList<Point> dbArray) {
   for (int i=0; i < dbArray.size()-1; i++) { 
     stroke(colorList[i]);
-    line(dbArray.get(i).getX(), dbArray.get(i).getY(), dbArray.get(i+1).getX(), dbArray.get(i+1).getY());
+    line(dbArray.get(i).getX() * distanceOffset, dbArray.get(i).getY() * distanceOffset, dbArray.get(i+1).getX() * distanceOffset, dbArray.get(i+1).getY() * distanceOffset);
   }
 }
 
@@ -324,10 +324,10 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   }
 
   stroke(colorList[800]);
-  line(xb1, yb1, xb2, yb2);
+  line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
   stroke(#ff0000);
   noFill();
-  rect(xb1, yb1, xb2-xb1, yb2-yb1);                                                                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);                                                                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 
@@ -349,7 +349,7 @@ void dealWithSerial() {
 
         //CREATE POINT OBJECT WITH CURRENT DATA
         int distance = int(data[0]);
-        data[0] = Float.toString((float(data[0]) * distanceOffset));
+        data[0] = Float.toString(float(data[0]));
         float angle = float(data[1]);
         int timeDiff = int(data[2]);
        // println(rotFreq);
