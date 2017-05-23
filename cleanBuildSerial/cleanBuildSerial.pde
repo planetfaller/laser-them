@@ -16,6 +16,7 @@ int errorCounter = 0;
 float lastAngle = 0;
 float rotFreq=0;
 float lastTime=1000;
+float angRes=0;
 
 
 // GUI
@@ -24,6 +25,7 @@ boolean linemodeOn;
 boolean ransacOn;
 boolean pointmodeOn;
 boolean onlyPointmodeOn;
+boolean rectmodeOn;
 
 // Ransac
 int m, b; 
@@ -68,11 +70,9 @@ int pointArraySize;
 
 int xory=0; // Sort ascending X/Y. 0/1
 
-
-
 void setup() {
   //WINDOW SETUP
-  size(700, 700); 
+  size(1200, 700); 
   surface.setResizable(true);
   //  fullScreen();    //enable fullscreen
 
@@ -106,48 +106,60 @@ void setup() {
     .addItems(split("a b", " "));
   ransacBar.changeItem("a", "text", "On");
   ransacBar.changeItem("b", "text", "Off");
+  
+    ButtonBar rectBar = cp5.addButtonBar("rectBar")
+    .setPosition(0, 180)
+    .setSize(100, 20)
+    .addItems(split("a b", " "));
+  rectBar.changeItem("a", "text", "On");
+  rectBar.changeItem("b", "text", "Off");
 
   cp5.addSlider("AngleOffsetSlider")
     .setRange(0, 360)
     .setCaptionLabel("Angle Offset")
     .setValue(0)
-    .setPosition(0, height-40)
+    .setPosition(0, height-20)
     .setSize(100, 10);
 
   cp5.addSlider("DistanceOffsetSlider")
-    .setRange(0, 1.5)
+    .setRange(0.1, 1.5)
     .setCaptionLabel("Distance Scale")
     .setValue(1)
-    .setPosition(0, height-60)
+    .setPosition(0, height-40)
     .setSize(100, 10);
 
   cp5.addTextfield("Max Number Of Points")
-    .setPosition(0, 200)
+    .setPosition(0, 220)
     .setText("220")
+    .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
 
   cp5.addTextfield("epsValue")
-    .setPosition(0, 250)
+    .setPosition(0, 270)
     .setText("20")
+    .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
 
   cp5.addTextfield("minPtsValue")
-    .setPosition(0, 300)
+    .setPosition(0, 320)
     .setText("3")
+    .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
 
   cp5.addTextfield("Ransac Threshold")
-    .setPosition(0, 350)
+    .setPosition(0, 370)
     .setText("10")
+    .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
 
   cp5.addTextfield("Ransac Hypos")
-    .setPosition(0, 400)
+    .setPosition(0, 420)
     .setText("200")
+    .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
 
@@ -231,7 +243,7 @@ void draw() {
         if (linemodeOn) {
           drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
         }
-        if (ransacOn) {
+        if (ransacOn || rectmodeOn) {
           drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
         }
       }
@@ -323,14 +335,17 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
     xb2 = xmax; // else all is good we go with values we got
   }
 
-  stroke(colorList[800]);
-  line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
-  stroke(#ff0000);
-  noFill();
-  rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);                                                                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  if(ransacOn){
+    stroke(colorList[800]);
+    line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
+  }
+  
+  if(rectmodeOn){
+    stroke(#ff0000);
+    noFill();
+    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);  
+  }
 }
-
-
 
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
@@ -352,11 +367,11 @@ void dealWithSerial() {
         data[0] = Float.toString(float(data[0]));
         float angle = float(data[1]);
         int timeDiff = int(data[2]);
-       // println(rotFreq);
         if (angle < 10 && lastAngle > 350) {
 
           if (timeCounter > 0) {
             rotFreq = 1/((timeCounter)/1000000);
+            angRes = 360.0/pointCounter;
           }
           pointCounter = 0;
           timeCounter = 0;
@@ -412,6 +427,13 @@ void lineBar(int n) {
     linemodeOn = true;
   }
 }
+void rectBar(int n) {
+  if (n == 1) {
+    rectmodeOn = false;
+  } else {
+    rectmodeOn = true;
+  }
+}
 void pointBar(int n) {
   if (n == 1) {
     pointmodeOn = false;
@@ -459,20 +481,26 @@ void controlEvent(ControlEvent theEvent) {
 void drawGUIText() {
   
   int xCoordinator = mouseX - width/2;
-  int yCoordinator = mouseY - width/2;
-    
+  int yCoordinator = mouseY - height/2;
+      
   text("Point Mode", -width/2, -height/2+15);
   text("Cluster Mode", -width/2, -height/2+55);
   text("Line Mode", -width/2, -height/2+95);
   text("Ransac Mode", -width/2, -height/2+135);
-  text("Rotation Frequency:", -width/2, -height/2 + 465);
-  text(rotFreq, -width/2, -height/2 + 480);
-  text("Update Frequency:", -width/2, -height/2 + 500);
-  text(1/(lastTime/1000000), -width/2, -height/2 + 515);
-  text("Number of error MS:", -width/2, -height/2 + 535);
-  text(errorCounter, -width/2, -height/2 + 550);
+  text("Rect Mode", -width/2, -height/2+175);  
+  
+  text("Rotation Frequency:", -width/2, -height/2 + 485);
+  text(rotFreq, -width/2, -height/2 + 500);
+  text("Update Frequency:", -width/2, -height/2 + 520);
+  text(1/(lastTime/1000000), -width/2, -height/2 + 535);
+  text("Angular Resolution:", -width/2, -height/2 + 555);
+  text(angRes, -width/2, -height/2 + 570);
+  
+  
+  text("Number of error MS:", -width/2, -height/2 + 590);
+  text(errorCounter, -width/2, -height/2 + 605);
 
-  text("Distance To Mouse:", -width/2, -height/2 + 570);
+  text("Distance To Mouse:", -width/2, -height/2 + 625);
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
-  text(round(totalDistanceToMouse) + " cm" , -width/2, -height/2 + 585);
+  text(round(totalDistanceToMouse) + " cm" , -width/2, -height/2 + 640);
 }
