@@ -72,9 +72,9 @@ int xory=0; // Sort ascending X/Y. 0/1
 
 void setup() {
   //WINDOW SETUP
-  size(1200, 700); 
-  surface.setResizable(true);
-  //  fullScreen();    //enable fullscreen
+  //size(1200, 700); 
+ // surface.setResizable(true);
+    fullScreen();    //enable fullscreen
 
   // FOR GUI
   cp5 = new ControlP5(this);
@@ -205,9 +205,7 @@ void draw() {
 
   drawGUIText();
 
-  int paSize = pointArray.size(); // store the size for use 
-
-  dealWithSerial(); // DO IT
+  dealWithSerial(); // Serial Communication
 
   if (pointArray.size() > 100) {
 
@@ -398,12 +396,15 @@ void dealWithSerial() {
 
 void serialEvent(Serial p) { 
   try {
-    counter++;
+
     if (counter>100) {
       inString = p.readStringUntil(',');
 
       String data[] = split(inString, ',');
       serialReadings.add(data[0]);
+    }
+    else{
+      counter++;
     }
   }
   catch(RuntimeException e) {
@@ -488,11 +489,11 @@ void drawGUIText() {
   text("Rect Mode", -width/2, -height/2+175);  
   
   text("Rotation Frequency:", -width/2, -height/2 + 485);
-  text(rotFreq + " Hz", -width/2, -height/2 + 500);
+  text(nf(rotFreq,1,3) + " Hz", -width/2, -height/2 + 500);
   text("Update Frequency:", -width/2, -height/2 + 520);
-  text(1/(lastTime/1000000)+ " Hz", -width/2, -height/2 + 535);
+  text( nf(1/(lastTime/1000000),1,3)+ " Hz", -width/2, -height/2 + 535);
   text("Angular Resolution:", -width/2, -height/2 + 555);
-  text(angRes, -width/2, -height/2 + 570);
+  text(nf(angRes,1,3) + "°", -width/2, -height/2 + 570);
   
   
   text("Number of error MS:", -width/2, -height/2 + 590);
