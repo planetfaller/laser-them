@@ -178,7 +178,6 @@ void setup() {
 
   bgColor=40;
 
-
   // FOR DATA
   filterOut=10; // filter out measurements closer than filterOut
 
@@ -194,7 +193,6 @@ void draw() {
 
   stroke(100);
   noFill();
-
 
   ellipse(0, 0, 200 * distanceOffset, 200 * distanceOffset);
   ellipse(0, 0, 600 * distanceOffset, 600 * distanceOffset);
@@ -490,9 +488,9 @@ void drawGUIText() {
   text("Rect Mode", -width/2, -height/2+175);  
   
   text("Rotation Frequency:", -width/2, -height/2 + 485);
-  text(rotFreq, -width/2, -height/2 + 500);
+  text(rotFreq + " Hz", -width/2, -height/2 + 500);
   text("Update Frequency:", -width/2, -height/2 + 520);
-  text(1/(lastTime/1000000), -width/2, -height/2 + 535);
+  text(1/(lastTime/1000000)+ " Hz", -width/2, -height/2 + 535);
   text("Angular Resolution:", -width/2, -height/2 + 555);
   text(angRes, -width/2, -height/2 + 570);
   
