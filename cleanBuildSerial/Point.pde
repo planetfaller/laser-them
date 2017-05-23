@@ -37,42 +37,37 @@ class Point implements Comparable<Point>
     return Y;
   }
 
-  float getTime(){
+  float getTime() {
     return timeDiff;
   }
-  
+
   int getId() {
     return id;
   }
-  color getColor(){
-  return pointColor;
+  color getColor() {
+    return pointColor;
   }
-  int getClusterID(){
-  return clusterID;
+  int getClusterID() {
+    return clusterID;
   }
-  void setcID(int incID){
+  void setcID(int incID) {
     clusterID = incID;
   }
-  void setColor(color inColor){
+  void setColor(color inColor) {
     pointColor = inColor;
   }
-  
-  void setSortMode(int sm){
+
+  void setSortMode(int sm) {
     sortMode = sm;
   }
-  
-  @ Override int compareTo(Point p0){
+
+  @ Override int compareTo(Point p0) {
     if (xory==0)
     {
       return (int)Math.signum(X-p0.getX()); // X decending
-    }
-    else
+    } else
     {
       return (int)Math.signum(Y-p0.getY()); // Y decending
     }
   }
-  
-  
-  
-  
 }

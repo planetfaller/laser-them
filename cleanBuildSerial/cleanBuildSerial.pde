@@ -1,8 +1,8 @@
 /*
 **
-** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
-**
-*/
+ ** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
+ **
+ */
 
 
 import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
@@ -63,7 +63,6 @@ color bgColor;
 float angleOffset = 0;
 float distanceOffset = 1;
 
-
 int pointArraySize;
 
 // FOR COMPARETO
@@ -73,8 +72,8 @@ int xory=0; // Sort ascending X/Y. 0/1
 void setup() {
   //WINDOW SETUP
   //size(1200, 700); 
- // surface.setResizable(true);
-    fullScreen();    //enable fullscreen
+  // surface.setResizable(true);
+  fullScreen();    //enable fullscreen
 
   // FOR GUI
   cp5 = new ControlP5(this);
@@ -106,8 +105,8 @@ void setup() {
     .addItems(split("a b", " "));
   ransacBar.changeItem("a", "text", "On");
   ransacBar.changeItem("b", "text", "Off");
-  
-    ButtonBar rectBar = cp5.addButtonBar("rectBar")
+
+  ButtonBar rectBar = cp5.addButtonBar("rectBar")
     .setPosition(0, 180)
     .setSize(100, 20)
     .addItems(split("a b", " "));
@@ -198,7 +197,7 @@ void draw() {
   ellipse(0, 0, 600 * distanceOffset, 600 * distanceOffset);
   ellipse(0, 0, 1000 * distanceOffset, 1000 * distanceOffset);
   ellipse(0, 0, 2000 * distanceOffset, 2000 * distanceOffset);
-  
+
   fill(100);
   rect(-15*distanceOffset, -20*distanceOffset, 30*distanceOffset, 40*distanceOffset);
   fill(#ffffff);
@@ -232,19 +231,16 @@ void draw() {
         }
       }
 
-      if (dbArray.size() > 10) {
+      Collections.sort(dbArray); // sort array on X ascending
 
-        Collections.sort(dbArray); // sort array on X ascending
-
-        if (linemodeOn) {
-          drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
-        }
-        if (ransacOn || rectmodeOn) {
-          drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
-        }
+      if (linemodeOn) {
+        drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
+      }
+      if (ransacOn || rectmodeOn) {
+        drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
       }
     }
-  }  
+  }
 
   translate(-width/2, -height/2);
 }// END OF DRAW
@@ -276,16 +272,17 @@ void drawOnlyPoints() {
 
 
 void drawConnectedPoints() {
+  stroke(colorList[800]);
   for (int i=0; i < pointArray.size()-1; i++) { // draw point connected chart
-    stroke(colorList[800]);
     line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
   }
 }
 
 // draw cluster points connected charts
 void drawClusterConnectedPoints(ArrayList<Point> dbArray) {
-  for (int i=0; i < dbArray.size()-1; i++) { 
-    stroke(colorList[i]);
+  stroke(colorList[int(random(999))]);
+  for (int i=0; i < dbArray.size()-1; i++) {
+
     line(dbArray.get(i).getX() * distanceOffset, dbArray.get(i).getY() * distanceOffset, dbArray.get(i+1).getX() * distanceOffset, dbArray.get(i+1).getY() * distanceOffset);
   }
 }
@@ -331,15 +328,15 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
     xb2 = xmax; // else all is good we go with values we got
   }
 
-  if(ransacOn){
+  if (ransacOn) {
     stroke(colorList[800]);
     line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
   }
-  
-  if(rectmodeOn){
+
+  if (rectmodeOn) {
     stroke(#ff0000);
     noFill();
-    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);  
+    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);
   }
 }
 
@@ -402,8 +399,7 @@ void serialEvent(Serial p) {
 
       String data[] = split(inString, ',');
       serialReadings.add(data[0]);
-    }
-    else{
+    } else {
       counter++;
     }
   }
@@ -478,28 +474,28 @@ void controlEvent(ControlEvent theEvent) {
 }
 
 void drawGUIText() {
-  
+
   int xCoordinator = mouseX - width/2;
   int yCoordinator = mouseY - height/2;
-      
+
   text("Point Mode", -width/2, -height/2+15);
   text("Cluster Mode", -width/2, -height/2+55);
   text("Line Mode", -width/2, -height/2+95);
   text("Ransac Mode", -width/2, -height/2+135);
   text("Rect Mode", -width/2, -height/2+175);  
-  
+
   text("Rotation Frequency:", -width/2, -height/2 + 485);
-  text(nf(rotFreq,1,3) + " Hz", -width/2, -height/2 + 500);
+  text(nf(rotFreq, 1, 3) + " Hz", -width/2, -height/2 + 500);
   text("Update Frequency:", -width/2, -height/2 + 520);
-  text( nf(1/(lastTime/1000000),1,3)+ " Hz", -width/2, -height/2 + 535);
+  text( nf(1/(lastTime/1000000), 1, 3)+ " Hz", -width/2, -height/2 + 535);
   text("Angular Resolution:", -width/2, -height/2 + 555);
-  text(nf(angRes,1,3) + "°", -width/2, -height/2 + 570);
-  
-  
+  text(nf(angRes, 1, 3) + "°", -width/2, -height/2 + 570);
+
+
   text("Number of error MS:", -width/2, -height/2 + 590);
   text(errorCounter, -width/2, -height/2 + 605);
 
   text("Distance To Mouse:", -width/2, -height/2 + 625);
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
-  text(round(totalDistanceToMouse) + " cm" , -width/2, -height/2 + 640);
+  text(round(totalDistanceToMouse) + " cm", -width/2, -height/2 + 640);
 }
