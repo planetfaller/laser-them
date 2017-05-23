@@ -1,8 +1,8 @@
 /*
 **
- ** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
- **
- */
+** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
+**
+*/
 
 
 import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
@@ -25,7 +25,11 @@ boolean ransacOn;
 boolean pointmodeOn;
 boolean onlyPointmodeOn;
 
-int m, b, ransacHypos, ransacThreshold; // Ransac
+// Ransac
+int m, b; 
+int ransacHypos = 200; // Ransac lines to try
+int ransacThreshold = 10; // Inliner threshold
+
 // DBSCAN
 int clusterCount; 
 int eps = 20;
@@ -55,7 +59,7 @@ color bgColor;
 
 // FOR OFFSET IN PLOTTER
 float angleOffset = 0;
-float distanceOffset = 700;
+float distanceOffset = 1;
 
 
 int pointArraySize;
@@ -111,7 +115,7 @@ void setup() {
     .setSize(100, 10);
 
   cp5.addSlider("DistanceOffsetSlider")
-    .setRange(0, 2)
+    .setRange(0, 1.5)
     .setCaptionLabel("Distance Scale")
     .setValue(1)
     .setPosition(0, height-60)
@@ -119,7 +123,7 @@ void setup() {
 
   cp5.addTextfield("Max Number Of Points")
     .setPosition(0, 200)
-    .setText("100")
+    .setText("220")
     .setSize(100, 20)
     .setAutoClear(false);
 
@@ -135,16 +139,21 @@ void setup() {
     .setSize(100, 20)
     .setAutoClear(false);
 
+  cp5.addTextfield("Ransac Threshold")
+    .setPosition(0, 350)
+    .setText("10")
+    .setSize(100, 20)
+    .setAutoClear(false);
 
-  // FOR RANSAC
+  cp5.addTextfield("Ransac Hypos")
+    .setPosition(0, 400)
+    .setText("200")
+    .setSize(100, 20)
+    .setAutoClear(false);
 
-  ransacHypos = 200; // Ransac lines to try
-  ransacThreshold = 10; // Inliner threshold
 
   // FOR DBSCAN
   clusterCount=0; // how many clusters in data set
-
-
 
   // FOR COLORS
   noc = 1000; // number of colors
@@ -159,11 +168,9 @@ void setup() {
 
 
   // FOR DATA
-
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-
   comPort = new Serial(this, Serial.list()[0], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
@@ -177,29 +184,22 @@ void draw() {
   noFill();
 
 
-  ellipse(0, 0, 200 * distanceOffset , 200 * distanceOffset);
-  ellipse(0, 0, 600 * distanceOffset , 600 * distanceOffset);
-  ellipse(0, 0, 1000 * distanceOffset , 1000 * distanceOffset);
-  ellipse(0, 0, 2000 * distanceOffset , 2000 * distanceOffset);
- 
+  ellipse(0, 0, 200 * distanceOffset, 200 * distanceOffset);
+  ellipse(0, 0, 600 * distanceOffset, 600 * distanceOffset);
+  ellipse(0, 0, 1000 * distanceOffset, 1000 * distanceOffset);
+  ellipse(0, 0, 2000 * distanceOffset, 2000 * distanceOffset);
+  
   fill(100);
   rect(-15*distanceOffset, -20*distanceOffset, 30*distanceOffset, 40*distanceOffset);
   fill(#ffffff);
- 
+
   drawGUIText();
-  
-  
-
-
 
   int paSize = pointArray.size(); // store the size for use 
 
   dealWithSerial(); // DO IT
 
-
-
-
-  if (pointArray.size() > 100) { 
+  if (pointArray.size() > 100) {
 
     if (onlyPointmodeOn) {
       drawOnlyPoints();
@@ -214,9 +214,7 @@ void draw() {
     // draw line connected point chart
     // drawConnectedPoints();
 
-
     // Build individual point clouds based on cluster ID
-
     for (int j=1; j< clusterCount-1; j++) { // minus one
 
       ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
@@ -231,7 +229,7 @@ void draw() {
         Collections.sort(dbArray); // sort array on X ascending
 
         if (linemodeOn) {
-           drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
+          drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
         }
         if (ransacOn) {
           drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
@@ -243,6 +241,7 @@ void draw() {
   translate(-width/2, -height/2);
 }// END OF DRAW
 
+
 void drawPoints() {
   for (int i=0; i < pointArray.size(); i++)
   {
@@ -253,7 +252,6 @@ void drawPoints() {
       // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
     } else
     {
-      //  println(pointArray.get(i).getTime());
       fill(clusterColor);
       rect(pointArray.get(i).getX(), pointArray.get(i).getY(), 2, 2);
     }
@@ -277,7 +275,6 @@ void drawConnectedPoints() {
 }
 
 // draw cluster points connected charts
-
 void drawClusterConnectedPoints(ArrayList<Point> dbArray) {
   for (int i=0; i < dbArray.size()-1; i++) { 
     stroke(colorList[i]);
@@ -296,10 +293,7 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   float ymin = dbArray.get(0).getY();
   float ymax = dbArray.get(dbArray.size()-1).getY();
 
-
-
   xory = 0;
-
 
   float[] bmCoeff =  new float[2];
   bmCoeff = getRansac(dbArray, ransacHypos, ransacThreshold);
@@ -308,30 +302,24 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   float yb2 = bmCoeff[0]*xmax+bmCoeff[1]; 
   float xb1;
 
-  if (yb1 < ymin)
-  { // yb1 less than y min, calculate x based on y min
+  if (yb1 < ymin) { // yb1 less than y min, calculate x based on y min
     xb1 = (ymin-bmCoeff[1])/bmCoeff[0];
     yb1 = ymin;
-  } else if (yb1 > ymax)
-  { // yb1 bigger than y max, calculate x based on y max
+  } else if (yb1 > ymax) { // yb1 bigger than y max, calculate x based on y max
     xb1 = (ymax-bmCoeff[1])/bmCoeff[0];
     yb1 = ymax;
-  } else
-  {
+  } else {
     xb1 = xmin; // else all is good we go with values we got
   }
 
   float xb2;
-  if (yb2 < ymin)
-  { // yb1 less than y min, calculate x based on y min
+  if (yb2 < ymin) { // yb1 less than y min, calculate x based on y min
     xb2 = (ymin-bmCoeff[1])/bmCoeff[0];
     yb2 = ymin;
-  } else if (yb2 > ymax)
-  { // yb1 bigger than y max, calculate x based on y max
+  } else if (yb2 > ymax) { // yb1 bigger than y max, calculate x based on y max
     xb2 = (ymax-bmCoeff[1])/bmCoeff[0];
     yb2 = ymax;
-  } else
-  {
+  } else {
     xb2 = xmax; // else all is good we go with values we got
   }
 
@@ -346,7 +334,6 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
 
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
-
 void dealWithSerial() {
   if (pointArray.size() > maxNumberOfPoints) {
     for (int i=1; i < serialReadings.size()-2; i++) {
@@ -365,7 +352,7 @@ void dealWithSerial() {
         data[0] = Float.toString((float(data[0]) * distanceOffset));
         float angle = float(data[1]);
         int timeDiff = int(data[2]);
-        println(rotFreq);
+       // println(rotFreq);
         if (angle < 10 && lastAngle > 350) {
 
           if (timeCounter > 0) {
@@ -385,20 +372,16 @@ void dealWithSerial() {
           errorCounter++;
         }
 
-
         if (float(data[0]) > filterOut) {
           Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
           // ADD POINT OBJECT TO ARRAYLIST
-          //println(pointObject.getX());
           pointArray.add(pointObject);
-          // inPointArray.add(pointObject);
         }
       }
     }
     serialReadings.clear();
   }
 }
-
 
 void serialEvent(Serial p) { 
   try {
@@ -444,7 +427,6 @@ void onlyPointBar(int n) {
   }
 }
 
-
 // SLIDER EVENT
 public void AngleOffsetSlider(float myOffset) {
   angleOffset = myOffset;
@@ -464,31 +446,33 @@ void controlEvent(ControlEvent theEvent) {
       minPts = int(theEvent.getStringValue());
     } else if (theEvent.getName() == "pointArraySizeValue") {
       maxNumberOfPoints = int(theEvent.getStringValue());
-      println(pointArraySize);
+    } else if (theEvent.getName() == "Ransac Threshold") {
+      ransacThreshold = int(theEvent.getStringValue());
+    } else if (theEvent.getName() == "Ransac Hypos") {
+      ransacHypos = int(theEvent.getStringValue());
+    } else if (theEvent.getName() == "Max Number Of Points") {
+      maxNumberOfPoints = int(theEvent.getStringValue());
     }
   }
 }
 
-void drawGUIText(){
+void drawGUIText() {
+  
+  int xCoordinator = mouseX - width/2;
+  int yCoordinator = mouseY - width/2;
+    
   text("Point Mode", -width/2, -height/2+15);
   text("Cluster Mode", -width/2, -height/2+55);
   text("Line Mode", -width/2, -height/2+95);
   text("Ransac Mode", -width/2, -height/2+135);
+  text("Rotation Frequency:", -width/2, -height/2 + 465);
+  text(rotFreq, -width/2, -height/2 + 480);
+  text("Update Frequency:", -width/2, -height/2 + 500);
+  text(1/(lastTime/1000000), -width/2, -height/2 + 515);
+  text("Number of error MS:", -width/2, -height/2 + 535);
+  text(errorCounter, -width/2, -height/2 + 550);
 
-  int xCoordinator = mouseX - width/2;
-  int yCoordinator = mouseY - width/2;
-  
-  text("Distance To Mouse:", -width/2, -height/2 + 535);
+  text("Distance To Mouse:", -width/2, -height/2 + 570);
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
-  text(totalDistanceToMouse, -width/2, -height/2 + 550);
-  
-  text("Rotation Frequency:", -width/2, -height/2 + 385);
-  text(rotFreq, -width/2, -height/2 + 400);
-  
-  text("Update Frequency:", -width/2, -height/2 + 420);
-  text(1/(lastTime/1000000), -width/2, -height/2 + 435);
-
-  text("Number of error MS:", -width/2, -height/2 + 455);
-  text(errorCounter, -width/2, -height/2 + 470);
-
+  text(round(totalDistanceToMouse) + " cm" , -width/2, -height/2 + 585);
 }
