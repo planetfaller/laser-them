@@ -1,8 +1,8 @@
 /*
 **
- ** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
- **
- */
+** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
+**
+*/
 
 
 import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
@@ -38,7 +38,6 @@ int eps = 20;
 int minPts = 3;
 
 // DATA AND SERIAL 
-
 ArrayList<Point> pointArray = new ArrayList<Point>(); // Data input array
 int filterOut;
 
@@ -482,7 +481,7 @@ void drawGUIText() {
   text("Cluster Mode", -width/2, -height/2+55);
   text("Line Mode", -width/2, -height/2+95);
   text("Ransac Mode", -width/2, -height/2+135);
-  text("Rect Mode", -width/2, -height/2+175);  
+  text("Rect Mode", -width/2, -height/2+175);
 
   text("Rotation Frequency:", -width/2, -height/2 + 485);
   text(nf(rotFreq, 1, 3) + " Hz", -width/2, -height/2 + 500);

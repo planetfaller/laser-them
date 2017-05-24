@@ -61,7 +61,7 @@ class Point implements Comparable<Point>
     sortMode = sm;
   }
 
-  @ Override int compareTo(Point p0) {
+  @Override int compareTo(Point p0) {
     if (xory==0)
     {
       return (int)Math.signum(X-p0.getX()); // X decending

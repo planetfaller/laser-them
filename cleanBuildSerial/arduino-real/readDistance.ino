@@ -14,18 +14,18 @@ void readDistance(boolean biasMode) {
   Wire.endTransmission();
 
   //Begin measurement
-  
+
   Wire.beginTransmission(addr);
   Wire.write(0x01);
-  
+
   //Write last measurements bytes Serial
   printToSerial();
-  
+
   // update rotation speed/position and ESC
 
-  if (interruptToggled){
-    angVelFun(); // call to update 
-    // escUpdate(); // call to update speed  
+  if (interruptToggled) {
+    angVelFun(); // call to update
+    // escUpdate(); // call to update speed
     interruptToggled = false; // we dealt with interrupt
   }
 
@@ -36,16 +36,16 @@ void readDistance(boolean biasMode) {
     Wire.beginTransmission(addr);
     Wire.write(0x01);
   } while (confirmByte & 1); // wait for LIDAR to complete reading
-  
-   timestamp = micros(); // collect timestamp
-   timeDiff = timestamp - lastTimeStamp;
-   lastTimeStamp = timestamp;
 
-  
+  timestamp = micros(); // collect timestamp
+  timeDiff = timestamp - lastTimeStamp;
+  lastTimeStamp = timestamp;
+
+
   angPosFun(); // call to update angular position
 
 
-  
+
   // read two bytes from 0x8f when reading is confirmed
 
   Wire.beginTransmission(addr);
@@ -57,7 +57,7 @@ void readDistance(boolean biasMode) {
   byte byteTwo = Wire.read();
 
   distance = (byteOne << 8) + byteTwo; // shift first byte left and concatenade
-  
+
   Wire.endTransmission();
 }
 

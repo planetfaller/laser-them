@@ -1,7 +1,6 @@
 /*
- * Print to serial. Handle serial communication here.
- * 
- */
+**   Print to serial. Handle serial communication here.
+*/
 
 
 void printToSerial() {
