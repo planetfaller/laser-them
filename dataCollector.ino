@@ -50,7 +50,7 @@ Servo esc; // instanciate server object
 int setVal=3.0; // setpoint rotation [Hz]
 int errorSum=0; // lastError
 int kp=5; // gain
-int escSpeed=1350;
+int escSpeed=1500;
 
 // Time related 
 unsigned long timestamp=0;
@@ -98,7 +98,7 @@ void setup() {
 
 // DELAY STUFF TO GIVE IT TIME TO START
 
-  delay(1000);
+  delay(2000);
   for(int i=1000; i < escSpeed; i++){
     esc.write(i);
     delay(10);

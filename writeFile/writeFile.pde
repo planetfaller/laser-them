@@ -16,7 +16,7 @@ int lf = 44;      // ASCII delimiter ","
 
 ArrayList<String> serialReadings;
 int counter=0;
-int  numberOfMeasurements=200; 
+int  numberOfMeasurements=30000; 
 int wait=0;
 
 
@@ -59,19 +59,24 @@ void draw() {
       counter++;
 
       dataDPT.print(serialReadings.get(i) + ","); // gets written to file
-      println(serialReadings.get(i));
+      // println(serialReadings.get(i));
 
-      String data[] = split(serialReadings.get(i), '@');
+      String data[] = split(serialReadings.get(i), '@'); // split on demarcator "@"
       //println(data[0]);
       //dataD.print(data[0] + ","); // gets written to file    
       //println(data[1]);
       //dataP.print(data[1] + ","); // gets written to file  
       //println(data[2]);
       
-      dataD.print(cos(radians(float(data[1])))*float(data[0]) + ","); // gets written to file
-      dataP.print(sin(radians(float(data[1])))*float(data[0]) + ","); // gets written to file  
-      
+      //dataD.print(cos(radians(float(data[1])))*float(data[0]) + ","); // gets written to file
+      //dataP.print(sin(radians(float(data[1])))*float(data[0]) + ","); // gets written to file  
+      try{
+      dataD.print(float(data[0]) + ","); // gets written to file
+      dataP.print(float(data[1]) + ","); // gets written to file            
       dataT.print(data[2] + ","); // gets written to file
+      }
+      catch(RuntimeException f){
+      }
     }
   }
   serialReadings.clear();
@@ -82,9 +87,10 @@ void serialEvent(Serial p) {
   try {
     wait++;
     if (wait>1000){
-    inString = p.readStringUntil(',');
-    String data[] = split(inString, ',');
-    serialReadings.add(data[0]);
+      wait=1001;
+      inString = p.readStringUntil(',');
+      String data[] = split(inString, ',');
+      serialReadings.add(data[0]);
     }
     else{
       p.clear();
