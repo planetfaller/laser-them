@@ -1,10 +1,10 @@
 void readData(){
-String[] inStringRaw = loadStrings("dataDPTsmall.dat");
+String[] inStringRaw = loadStrings("dataDPT.dat");
 // String inString = inStringArray[0];
 
 String inStringReading[] = split(inStringRaw[0],','); 
 
-for (int i=0;i<740; i++){ // inStringReading.length
+for (int i=0;i<4000; i++){ // inStringReading.length
   if (!inStringReading[i].equals("null")){
     String data[] = split(inStringReading[i],'@');
 
@@ -16,11 +16,10 @@ for (int i=0;i<740; i++){ // inStringReading.length
     
     //println(int(pointObject.getX()+1000)/20);
     //println(pointObject.getY()+1000);
-    if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]<8){
+    if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]<8){ // populate the grid, readings get added until 
       grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]=grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]+1;
       println( grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]);
        pointArray.add(pointObject);
-       
     }  
 
   }

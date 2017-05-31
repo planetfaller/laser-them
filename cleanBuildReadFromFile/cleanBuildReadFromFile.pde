@@ -18,17 +18,12 @@ float rotFreq=0;
 float lastTime=1000;
 float angRes=0;
 
-// OCCUPY GRID
-
-int[][] grid = new int[200][200]; // create a hundred by hundred occupy grid
-
-
 
 // GUI
 ControlP5 cp5; 
 boolean linemodeOn;
 boolean ransacOn;
-boolean clusterPointmodeOn;
+boolean pointmodeOn;
 boolean onlyPointmodeOn;
 boolean rectmodeOn;
 
@@ -43,13 +38,14 @@ int eps = 20;
 int minPts = 3;
 
 // DATA AND SERIAL 
+
 ArrayList<Point> pointArray = new ArrayList<Point>(); // Data input array
 int filterOut;
 
 // FOR SERIAL
- Serial comPort;    // The serial port
- String inString;  // Input string
- int lf = 44;      // ASCII delimiter ","
+Serial comPort;    // The serial port
+String inString;  // Input string
+int lf = 44;      // ASCII delimiter ","
 
 // DECLARE FOR TEMPORARY STORAGE OF READINGS
 FloatList distance, position, timestamp;
@@ -67,21 +63,18 @@ color bgColor;
 float angleOffset = 0;
 float distanceOffset = 1;
 
+
 int pointArraySize;
 
 // FOR COMPARETO
 
 int xory=0; // Sort ascending X/Y. 0/1
 
-// FOR DBSCAN
-
-int currentNumberOfClusters = 0;
-
 void setup() {
   //WINDOW SETUP
-  //size(1200, 700); 
-  // surface.setResizable(true);
-  fullScreen();    //enable fullscreen
+  size(1200, 700); 
+  surface.setResizable(true);
+  //  fullScreen();    //enable fullscreen
 
   // FOR GUI
   cp5 = new ControlP5(this);
@@ -93,12 +86,12 @@ void setup() {
   onlyPointBar.changeItem("a", "text", "On");
   onlyPointBar.changeItem("b", "text", "Off");
 
-  ButtonBar clusterPointBar = cp5.addButtonBar("clusterPointBar")
+  ButtonBar pointBar = cp5.addButtonBar("pointBar")
     .setPosition(0, 60)
     .setSize(100, 20)
     .addItems(split("a b", " "));
-  clusterPointBar.changeItem("a", "text", "On");
-  clusterPointBar.changeItem("b", "text", "Off");
+  pointBar.changeItem("a", "text", "On");
+  pointBar.changeItem("b", "text", "Off");
 
   ButtonBar lineBar = cp5.addButtonBar("lineBar")
     .setPosition(0, 100)
@@ -113,8 +106,8 @@ void setup() {
     .addItems(split("a b", " "));
   ransacBar.changeItem("a", "text", "On");
   ransacBar.changeItem("b", "text", "Off");
-
-  ButtonBar rectBar = cp5.addButtonBar("rectBar")
+  
+    ButtonBar rectBar = cp5.addButtonBar("rectBar")
     .setPosition(0, 180)
     .setSize(100, 20)
     .addItems(split("a b", " "));
@@ -189,12 +182,9 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[0], 115200);
-  comPort.bufferUntil(lf);
-  serialReadings = new ArrayList<String>();
-
-// readData();
-
+  // comPort = new Serial(this, Serial.list()[0], 115200);
+  // comPort.bufferUntil(lf);
+  // serialReadings = new ArrayList<String>();
 }
 
 void draw() {
@@ -203,50 +193,43 @@ void draw() {
 
   stroke(100);
   noFill();
-  
-  readSerial();
-
- for (int i=0; i<100; i++){
-  for (int j=0; j < 100; j++){
-    if(grid[i][j]>0){
-     // text(grid[i][j], (i*20)-1000,(j*20)-1000); 
-  }
-}
-}
-
-
 
   ellipse(0, 0, 200 * distanceOffset, 200 * distanceOffset);
   ellipse(0, 0, 600 * distanceOffset, 600 * distanceOffset);
   ellipse(0, 0, 1000 * distanceOffset, 1000 * distanceOffset);
   ellipse(0, 0, 2000 * distanceOffset, 2000 * distanceOffset);
-
+  
   fill(100);
   rect(-15*distanceOffset, -20*distanceOffset, 30*distanceOffset, 40*distanceOffset);
   fill(#ffffff);
 
   drawGUIText();
 
-  // dealWithSerial(); // Serial Communication
+  readFromFile();
+
+  int paSize = pointArray.size(); // store the size for use 
+
+  // dealWithSerial(); // DO IT
+
+  
 
   if (pointArray.size() > 100) {
-    drawOnlyPoints();
+
     if (onlyPointmodeOn) {
-      
-      
+      drawOnlyPoints();
     }
 
-    int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
-    currentNumberOfClusters = (max(clusters));
+    DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
+
     // draw point chart 
-    if (clusterPointmodeOn) {
-      drawClusterPoints();
+    if (pointmodeOn) {
+      drawPoints();
     }
     // draw line connected point chart
     // drawConnectedPoints();
 
     // Build individual point clouds based on cluster ID
-    for (int j=1; j< clusterCount; j++) { // minus one
+    for (int j=1; j< clusterCount-1; j++) { // minus one
 
       ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
       for (int i=0; i < pointArray.size(); i++) { // minus one
@@ -255,57 +238,39 @@ void draw() {
         }
       }
 
-      Collections.sort(dbArray); // sort array on X ascending
+      if (dbArray.size() > 10) {
 
-      if (linemodeOn) {
-        drawClusterConnectedPoints(); // draw line connected point chart based on cluster
-      }
-      if (ransacOn || rectmodeOn) {
-        drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
+        Collections.sort(dbArray); // sort array on X ascending
+
+        if (linemodeOn) {
+          drawClusterConnectedPoints(dbArray); // draw line connected point chart based on cluster
+        }
+        if (ransacOn || rectmodeOn) {
+          drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
+        }
       }
     }
-  }
+  }  
 
   translate(-width/2, -height/2);
 }// END OF DRAW
 
 
-//void drawPoints() {
-//  for (int i=0; i < pointArray.size(); i++)
-//  {
-//    color clusterColor = (colorList[pointArray.get(i).getClusterID()]);
-//    stroke(clusterColor);
-//    if (pointArray.get(i).getClusterID()==0) {
-//      noFill();
-//      // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
-//    } else
-//    {
-//      fill(clusterColor);
-//      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX(),pointArray.get(i).getY());
-//      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
-      
-//    }
-//  }
-//}
-
-
-void drawClusterPoints() {
-  for (int i=0; i < pointArray.size(); i++){ // loop through points in set
-      if (pointArray.get(i).getClusterID()==0) { // is clusterID is zero its an outlier and is not drawn
-        noFill();
-        // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
-      } else
+void drawPoints() {
+  for (int i=0; i < pointArray.size(); i++)
+  {
+    color clusterColor = (colorList[pointArray.get(i).getClusterID()]);
+    stroke(clusterColor);
+    if (pointArray.get(i).getClusterID()==0) {
+      noFill();
+      // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
+    } else
     {
-      color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
-      stroke(clusterColor);
       fill(clusterColor);
-      
-      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX(),pointArray.get(i).getY());
-      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 4, 4);     
+      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
     }
   }
 }
-
 
 
 void drawOnlyPoints() {
@@ -317,30 +282,17 @@ void drawOnlyPoints() {
 
 
 void drawConnectedPoints() {
-  stroke(colorList[800]);
   for (int i=0; i < pointArray.size()-1; i++) { // draw point connected chart
+    stroke(colorList[800]);
     line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
   }
 }
 
 // draw cluster points connected charts
-//void drawClusterConnectedPoints(ArrayList<Point> dbArray) {
-//  stroke(colorList[int(random(999))]);
-//  for (int i=0; i < dbArray.size()-1; i++) {
-//    line(dbArray.get(i).getX() * distanceOffset, dbArray.get(i).getY() * distanceOffset, dbArray.get(i+1).getX() * distanceOffset, dbArray.get(i+1).getY() * distanceOffset);
-//   }
-//}
-
-
-void drawClusterConnectedPoints() {
-  for (int i=1; i < currentNumberOfClusters; i++) {
-    for (int j=0; j < pointArray.size()-1; j++) { 
-      if(pointArray.get(j).getClusterID()==i){
-        color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
-        stroke(clusterColor);
-        line(pointArray.get(j).getX() * distanceOffset, pointArray.get(j).getY() * distanceOffset, pointArray.get(j+1).getX() * distanceOffset, pointArray.get(j+1).getY() * distanceOffset);
-      }
- }
+void drawClusterConnectedPoints(ArrayList<Point> dbArray) {
+  for (int i=0; i < dbArray.size()-1; i++) { 
+    stroke(colorList[i]);
+    line(dbArray.get(i).getX() * distanceOffset, dbArray.get(i).getY() * distanceOffset, dbArray.get(i+1).getX() * distanceOffset, dbArray.get(i+1).getY() * distanceOffset);
   }
 }
 
@@ -384,18 +336,16 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   } else {
     xb2 = xmax; // else all is good we go with values we got
   }
-  
 
-
-  if (ransacOn) {
+  if(ransacOn){
     stroke(colorList[800]);
     line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
   }
-
-  if (rectmodeOn) {
+  
+  if(rectmodeOn){
     stroke(#ff0000);
     noFill();
-    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);
+    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);  
   }
 }
 
@@ -450,21 +400,65 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
 //  }
 //}
 
-void serialEvent(Serial p) { 
-  try {
-    if (counter>500) {
-      inString = p.readStringUntil(',');
+//void serialEvent(Serial p) { 
+//  try {
+//    counter++;
+//    if (counter>100) {
+//      inString = p.readStringUntil(',');
 
-      String data[] = split(inString, ',');
-      serialReadings.add(data[0]);
-    } else {
-      counter++;
-      p.clear();
+//      String data[] = split(inString, ',');
+//      serialReadings.add(data[0]);
+//    }
+//  }
+//  catch(RuntimeException e) {
+//  }
+//}
+
+void readFromFile() {
+  pointArray.clear();
+  String[] inString = loadStrings("dataDPT.dat");
+  String dataReadings[] = split(inString[0], ',');
+  for (int i=150; i<300; i++) {
+
+      String data[] = split(dataReadings[i], '@');
+      if (data.length==3 && data != null) {
+
+        //CREATE POINT OBJECT WITH CURRENT DATA
+        int distance = int(data[0]);
+        data[0] = Float.toString(float(data[0]));
+        float angle = float(data[1]);
+        int timeDiff = int(data[2]);
+        if (angle < 10 && lastAngle > 350) {
+
+          if (timeCounter > 0) {
+            rotFreq = 1/((timeCounter)/1000000);
+            angRes = 360.0/pointCounter;
+          }
+          pointCounter = 0;
+          timeCounter = 0;
+          errorCounter = 0;
+        }
+
+        pointCounter++;
+        timeCounter = timeDiff + timeCounter;
+        lastTime = timeDiff;
+        lastAngle = angle;
+
+        if (distance == 1) {
+          errorCounter++;
+        }
+
+        if (float(data[0]) > filterOut) {
+          Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
+          // ADD POINT OBJECT TO ARRAYLIST
+          pointArray.add(pointObject);
+        }
+      }
     }
   }
-  catch(RuntimeException e) {
-  }
-}
+
+
+
 
 // MENU BAR EVENT
 void ransacBar(int n) {
@@ -488,11 +482,11 @@ void rectBar(int n) {
     rectmodeOn = true;
   }
 }
-void clusterPointBar(int n) {
+void pointBar(int n) {
   if (n == 1) {
-    clusterPointmodeOn = false;
+    pointmodeOn = false;
   } else {
-    clusterPointmodeOn = true;
+    pointmodeOn = true;
   }
 }
 void onlyPointBar(int n) {
@@ -533,28 +527,28 @@ void controlEvent(ControlEvent theEvent) {
 }
 
 void drawGUIText() {
-
+  
   int xCoordinator = mouseX - width/2;
   int yCoordinator = mouseY - height/2;
-
+      
   text("Point Mode", -width/2, -height/2+15);
   text("Cluster Mode", -width/2, -height/2+55);
   text("Line Mode", -width/2, -height/2+95);
   text("Ransac Mode", -width/2, -height/2+135);
-  text("Rect Mode", -width/2, -height/2+175);
-
+  text("Rect Mode", -width/2, -height/2+175);  
+  
   text("Rotation Frequency:", -width/2, -height/2 + 485);
-  text(nf(rotFreq, 1, 3) + " Hz", -width/2, -height/2 + 500);
+  text(rotFreq + " Hz", -width/2, -height/2 + 500);
   text("Update Frequency:", -width/2, -height/2 + 520);
-  text( nf(1/(lastTime/1000000), 1, 3)+ " Hz", -width/2, -height/2 + 535);
+  text(1/(lastTime/1000000)+ " Hz", -width/2, -height/2 + 535);
   text("Angular Resolution:", -width/2, -height/2 + 555);
-  text(nf(angRes, 1, 3) + "°", -width/2, -height/2 + 570);
-
-
+  text(angRes, -width/2, -height/2 + 570);
+  
+  
   text("Number of error MS:", -width/2, -height/2 + 590);
   text(errorCounter, -width/2, -height/2 + 605);
 
   text("Distance To Mouse:", -width/2, -height/2 + 625);
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
-  text(round(totalDistanceToMouse) + " cm", -width/2, -height/2 + 640);
+  text(round(totalDistanceToMouse) + " cm" , -width/2, -height/2 + 640);
 }
