@@ -20,7 +20,7 @@ float angRes=0;
 
 // OCCUPY GRID
 
-int[][] grid = new int[200][200]; // create a hundred by hundred occupy grid
+int[][] grid = new int[40][40]; // create a hundred by hundred occupy grid
 
 
 
@@ -189,7 +189,7 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[2], 115200);
+  comPort = new Serial(this, Serial.list()[0], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
@@ -205,10 +205,10 @@ void draw() {
 
   readSerial();
 
-  for (int i=0; i<200; i++) {
-    for (int j=0; j < 200; j++) {
+  for (int i=0; i<40; i++) {
+    for (int j=0; j < 40; j++) {
       if (grid[i][j]>0) {
-         text(grid[i][j], (i*10)-1000,(j*10)-1000);
+         text(grid[i][j], (i*50)-1000,(j*50)-1000);
       }
     }
   }

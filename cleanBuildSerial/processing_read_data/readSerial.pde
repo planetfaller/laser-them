@@ -49,8 +49,8 @@ void readSerial() {
 
            //println(int(pointObject.getX()+1000)/20);
            //println(pointObject.getY()+1000);
-          if (grid[int(pointObject.getX()+1000)/10][int(pointObject.getY()+1000)/10]<8){ // populate the grid, readings get added until 
-            grid[int(pointObject.getX()+1000)/10][int(pointObject.getY()+1000)/10]=grid[int(pointObject.getX()+1000)/10][int(pointObject.getY()+1000)/10]+1;
+          if (grid[int(pointObject.getX()+1000)/50][int(pointObject.getY()+1000)/50]<8){ // populate the grid, readings get added until 
+            grid[int(pointObject.getX()+1000)/50][int(pointObject.getY()+1000)/50]=grid[int(pointObject.getX()+1000)/50][int(pointObject.getY()+1000)/50]+1;
             // println( grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]);
              pointArray.add(pointObject);
           }  
