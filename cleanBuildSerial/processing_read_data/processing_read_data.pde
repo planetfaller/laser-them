@@ -189,11 +189,11 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[0], 115200);
+  comPort = new Serial(this, Serial.list()[2], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
-// readData();
+ // readData();
 
 }
 
@@ -227,17 +227,20 @@ void draw() {
 
   drawGUIText();
 
+
+
   // dealWithSerial(); // Serial Communication
 
   if (pointArray.size() > 100) {
-    drawOnlyPoints();
+
+      int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
+    currentNumberOfClusters = max(clusters); // store current number of clusters 
+    
     if (onlyPointmodeOn) {
-      
-      
+         drawOnlyPoints();
     }
 
-    int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
-    currentNumberOfClusters = (max(clusters));
+    
     // draw point chart 
     if (clusterPointmodeOn) {
       drawClusterPoints();
@@ -245,25 +248,26 @@ void draw() {
     // draw line connected point chart
     // drawConnectedPoints();
 
-    // Build individual point clouds based on cluster ID
-    for (int j=1; j< clusterCount; j++) { // minus one
 
-      ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
-      for (int i=0; i < pointArray.size(); i++) { // minus one
-        if (pointArray.get(i).getClusterID()==j) {
-          dbArray.add(pointArray.get(i));
-        }
-      }
 
-      Collections.sort(dbArray); // sort array on X ascending
+ if (linemodeOn) {
+    drawClusterConnectedPoints(); // draw line connected point chart based on cluster
+  }
+  
+  if (rectmodeOn) {
+    drawRect();
+    //stroke(#ff0000);
+    //noFill();
+    //rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);
+  }
+  
+  
+    //  if (ransacOn || rectmodeOn) {
+    //    drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
+    //  }
+    //}
 
-      if (linemodeOn) {
-        drawClusterConnectedPoints(); // draw line connected point chart based on cluster
-      }
-      if (ransacOn || rectmodeOn) {
-        drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
-      }
-    }
+
   }
 
   translate(-width/2, -height/2);
@@ -299,8 +303,7 @@ void drawClusterPoints() {
       color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
       stroke(clusterColor);
       fill(clusterColor);
-      
-      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX(),pointArray.get(i).getY());
+      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX() * distanceOffset,pointArray.get(i).getY() * distanceOffset);
       rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 4, 4);     
     }
   }
@@ -333,15 +336,17 @@ void drawConnectedPoints() {
 
 
 void drawClusterConnectedPoints() {
-  for (int i=1; i < currentNumberOfClusters; i++) {
-    for (int j=0; j < pointArray.size()-1; j++) { 
-      if(pointArray.get(j).getClusterID()==i){
-        color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
-        stroke(clusterColor);
-        line(pointArray.get(j).getX() * distanceOffset, pointArray.get(j).getY() * distanceOffset, pointArray.get(j+1).getX() * distanceOffset, pointArray.get(j+1).getY() * distanceOffset);
-      }
- }
-  }
+  xory=2;
+  Collections.sort(pointArray);
+  
+  for (int i=0; i < pointArray.size()-1; i++) {
+        int currentCluster = pointArray.get(i).getClusterID();
+        if (currentCluster > 0){
+          color clusterColor = (colorList[currentCluster]); // pick a color for each clusterID
+          stroke(clusterColor);
+          line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
+        }  
+    }
 }
 
 
@@ -399,6 +404,76 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   }
 }
 
+
+void drawRect(){
+      // Build individual point clouds based on cluster ID
+    ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
+    
+    for (int i=1; i <= currentNumberOfClusters; i++) { // minus one 
+      
+      for (int j=0; j < pointArray.size()-1; j++) { // minus one
+        if (pointArray.get(j).getClusterID()==i) {
+          dbArray.add(pointArray.get(j));
+        }
+      }
+      
+      xory=0;
+      Collections.sort(dbArray); // sort array on X ascending
+      float xmax = dbArray.get(dbArray.size()-1).getX();
+      float xmin = dbArray.get(0).getX();
+      
+      xory=1;
+      Collections.sort(dbArray); // sort array on Y ascending   
+      float ymax = dbArray.get(dbArray.size()-1).getY();
+      float ymin = dbArray.get(0).getY();
+      
+      
+      stroke(#ff0000);
+      noFill();
+      
+      rect(xmin * distanceOffset, ymin * distanceOffset, (xmax-xmin) * distanceOffset, (ymax-ymin) * distanceOffset);
+      
+      
+        float[] bmCoeff =  new float[2];
+        bmCoeff = getRansac(dbArray, ransacHypos, ransacThreshold);
+  
+      float yb1 = bmCoeff[0]*xmin+bmCoeff[1]; // bx + m
+    float yb2 = bmCoeff[0]*xmax+bmCoeff[1]; 
+    float xb1;
+  
+    if (yb1 < ymin) { // yb1 less than y min, calculate x based on y min
+      xb1 = (ymin-bmCoeff[1])/bmCoeff[0];
+      yb1 = ymin;
+    } else if (yb1 > ymax) { // yb1 bigger than y max, calculate x based on y max
+      xb1 = (ymax-bmCoeff[1])/bmCoeff[0];
+      yb1 = ymax;
+    } else {
+      xb1 = xmin; // else all is good we go with values we got
+    }
+  
+    float xb2;
+    if (yb2 < ymin) { // yb1 less than y min, calculate x based on y min
+      xb2 = (ymin-bmCoeff[1])/bmCoeff[0];
+      yb2 = ymin;
+    } else if (yb2 > ymax) { // yb1 bigger than y max, calculate x based on y max
+      xb2 = (ymax-bmCoeff[1])/bmCoeff[0];
+      yb2 = ymax;
+    } else {
+      xb2 = xmax; // else all is good we go with values we got
+    }
+    
+    
+    if (ransacOn) {
+        stroke(colorList[800]);
+        strokeWeight(6);
+        line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
+     }
+      
+      
+      dbArray.clear();
+    }
+      strokeWeight(1);
+  }
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
 //void dealWithSerial() {
