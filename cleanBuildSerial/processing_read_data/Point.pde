@@ -68,10 +68,9 @@ class Point implements Comparable<Point>
     } else if (xory==1)
     {
       return (int)Math.signum(Y-p0.getY()); // Y decending
-    }
-   else 
+    } else 
     {
       return (int)Math.signum(clusterID-p0.getClusterID()); // Y decending
-  }
+    }
   }
 }

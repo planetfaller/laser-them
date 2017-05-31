@@ -1,8 +1,8 @@
 /*
 **
-** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
-**
-*/
+ ** Plotter for warning and monitor system with LiDAR, designed by Simon Ask and Rickard Lindh
+ **
+ */
 
 
 import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
@@ -47,9 +47,9 @@ ArrayList<Point> pointArray = new ArrayList<Point>(); // Data input array
 int filterOut;
 
 // FOR SERIAL
- Serial comPort;    // The serial port
- String inString;  // Input string
- int lf = 44;      // ASCII delimiter ","
+Serial comPort;    // The serial port
+String inString;  // Input string
+int lf = 44;      // ASCII delimiter ","
 
 // DECLARE FOR TEMPORARY STORAGE OF READINGS
 FloatList distance, position, timestamp;
@@ -193,8 +193,7 @@ void setup() {
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
- // readData();
-
+  // readData();
 }
 
 void draw() {
@@ -203,16 +202,16 @@ void draw() {
 
   stroke(100);
   noFill();
-  
+
   readSerial();
 
- for (int i=0; i<100; i++){
-  for (int j=0; j < 100; j++){
-    if(grid[i][j]>0){
-     // text(grid[i][j], (i*20)-1000,(j*20)-1000); 
+  for (int i=0; i<200; i++) {
+    for (int j=0; j < 200; j++) {
+      if (grid[i][j]>0) {
+         text(grid[i][j], (i*10)-1000,(j*10)-1000);
+      }
+    }
   }
-}
-}
 
 
 
@@ -222,7 +221,7 @@ void draw() {
   ellipse(0, 0, 2000 * distanceOffset, 2000 * distanceOffset);
 
   fill(100);
-  rect(-15*distanceOffset, -20*distanceOffset, 30*distanceOffset, 40*distanceOffset);
+  rect(-15*distanceOffset, -15*distanceOffset, 30*distanceOffset, 30*distanceOffset);
   fill(#ffffff);
 
   drawGUIText();
@@ -233,14 +232,14 @@ void draw() {
 
   if (pointArray.size() > 100) {
 
-      int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
+    int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
     currentNumberOfClusters = max(clusters); // store current number of clusters 
-    
+
     if (onlyPointmodeOn) {
-         drawOnlyPoints();
+      drawOnlyPoints();
     }
 
-    
+
     // draw point chart 
     if (clusterPointmodeOn) {
       drawClusterPoints();
@@ -250,24 +249,21 @@ void draw() {
 
 
 
- if (linemodeOn) {
-    drawClusterConnectedPoints(); // draw line connected point chart based on cluster
-  }
-  
-  if (rectmodeOn) {
-    drawRect();
+    if (linemodeOn) {
+      drawClusterConnectedPoints(); // draw line connected point chart based on cluster
+    }
+
+    //if (rectmodeOn) {
+    //  drawRect();
     //stroke(#ff0000);
     //noFill();
     //rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);
-  }
-  
-  
-    //  if (ransacOn || rectmodeOn) {
-    //    drawRansacCluster(dbArray); // draw RANSAC lines based on clusters
-    //  }
     //}
 
 
+    if (ransacOn || rectmodeOn) {
+      drawRectRansac();
+    }
   }
 
   translate(-width/2, -height/2);
@@ -287,24 +283,24 @@ void draw() {
 //      fill(clusterColor);
 //      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX(),pointArray.get(i).getY());
 //      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
-      
+
 //    }
 //  }
 //}
 
 
 void drawClusterPoints() {
-  for (int i=0; i < pointArray.size(); i++){ // loop through points in set
-      if (pointArray.get(i).getClusterID()==0) { // is clusterID is zero its an outlier and is not drawn
-        noFill();
-        // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
-      } else
+  for (int i=0; i < pointArray.size(); i++) { // loop through points in set
+    if (pointArray.get(i).getClusterID()==0) { // is clusterID is zero its an outlier and is not drawn
+      noFill();
+      // ellipse(pointArray.get(i).getX(),pointArray.get(i).getY(), 20,20);
+    } else
     {
       color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
       stroke(clusterColor);
       fill(clusterColor);
-      text(str(pointArray.get(i).getClusterID()),pointArray.get(i).getX() * distanceOffset,pointArray.get(i).getY() * distanceOffset);
-      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 4, 4);     
+      text(str(pointArray.get(i).getClusterID()), pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset);
+      rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 4, 4);
     }
   }
 }
@@ -338,15 +334,15 @@ void drawConnectedPoints() {
 void drawClusterConnectedPoints() {
   xory=2;
   Collections.sort(pointArray);
-  
+
   for (int i=0; i < pointArray.size()-1; i++) {
-        int currentCluster = pointArray.get(i).getClusterID();
-        if (currentCluster > 0){
-          color clusterColor = (colorList[currentCluster]); // pick a color for each clusterID
-          stroke(clusterColor);
-          line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
-        }  
+    int currentCluster = pointArray.get(i).getClusterID();
+    if (currentCluster > 0) {
+      color clusterColor = (colorList[currentCluster]); // pick a color for each clusterID
+      stroke(clusterColor);
+      line(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, pointArray.get(i+1).getX() * distanceOffset, pointArray.get(i+1).getY() * distanceOffset);
     }
+  }
 }
 
 
@@ -389,7 +385,7 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   } else {
     xb2 = xmax; // else all is good we go with values we got
   }
-  
+
 
 
   if (ransacOn) {
@@ -400,47 +396,48 @@ void drawRansacCluster(ArrayList<Point> dbArray) {
   if (rectmodeOn) {
     stroke(#ff0000);
     noFill();
-    rect(xb1 * distanceOffset, yb1 * distanceOffset, (xb2-xb1) * distanceOffset, (yb2-yb1) * distanceOffset);
+    rect(xmin * distanceOffset, ymin * distanceOffset, (xmax-xmin) * distanceOffset, (ymax-ymin) * distanceOffset);
   }
 }
 
 
-void drawRect(){
-      // Build individual point clouds based on cluster ID
-    ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
-    
-    for (int i=1; i <= currentNumberOfClusters; i++) { // minus one 
-      
-      for (int j=0; j < pointArray.size()-1; j++) { // minus one
-        if (pointArray.get(j).getClusterID()==i) {
-          dbArray.add(pointArray.get(j));
-        }
+void drawRectRansac() {
+  // Build individual point clouds based on cluster ID
+  ArrayList<Point> dbArray = new ArrayList<Point>(); // collect clusters
+
+  for (int i=1; i <= currentNumberOfClusters; i++) { // minus one 
+
+    for (int j=0; j < pointArray.size()-1; j++) { // minus one
+      if (pointArray.get(j).getClusterID()==i) {
+        dbArray.add(pointArray.get(j));
       }
-      
-      xory=0;
-      Collections.sort(dbArray); // sort array on X ascending
-      float xmax = dbArray.get(dbArray.size()-1).getX();
-      float xmin = dbArray.get(0).getX();
-      
-      xory=1;
-      Collections.sort(dbArray); // sort array on Y ascending   
-      float ymax = dbArray.get(dbArray.size()-1).getY();
-      float ymin = dbArray.get(0).getY();
-      
-      
+    }
+
+    xory=0;
+    Collections.sort(dbArray); // sort array on X ascending
+    float xmax = dbArray.get(dbArray.size()-1).getX();
+    float xmin = dbArray.get(0).getX();
+
+    xory=1;
+    Collections.sort(dbArray); // sort array on Y ascending   
+    float ymax = dbArray.get(dbArray.size()-1).getY();
+    float ymin = dbArray.get(0).getY();
+
+    if (rectmodeOn) {
       stroke(#ff0000);
       noFill();
-      
       rect(xmin * distanceOffset, ymin * distanceOffset, (xmax-xmin) * distanceOffset, (ymax-ymin) * distanceOffset);
-      
-      
-        float[] bmCoeff =  new float[2];
-        bmCoeff = getRansac(dbArray, ransacHypos, ransacThreshold);
-  
-      float yb1 = bmCoeff[0]*xmin+bmCoeff[1]; // bx + m
+    }
+    // 
+
+
+    float[] bmCoeff =  new float[2];
+    bmCoeff = getRansac(dbArray, ransacHypos, ransacThreshold);
+
+    float yb1 = bmCoeff[0]*xmin+bmCoeff[1]; // bx + m
     float yb2 = bmCoeff[0]*xmax+bmCoeff[1]; 
     float xb1;
-  
+
     if (yb1 < ymin) { // yb1 less than y min, calculate x based on y min
       xb1 = (ymin-bmCoeff[1])/bmCoeff[0];
       yb1 = ymin;
@@ -450,7 +447,7 @@ void drawRect(){
     } else {
       xb1 = xmin; // else all is good we go with values we got
     }
-  
+
     float xb2;
     if (yb2 < ymin) { // yb1 less than y min, calculate x based on y min
       xb2 = (ymin-bmCoeff[1])/bmCoeff[0];
@@ -461,19 +458,19 @@ void drawRect(){
     } else {
       xb2 = xmax; // else all is good we go with values we got
     }
-    
-    
+
+
     if (ransacOn) {
-        stroke(colorList[800]);
-        strokeWeight(6);
-        line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
-     }
-      
-      
-      dbArray.clear();
+      stroke(colorList[800]);
+      strokeWeight(6);
+      line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
     }
-      strokeWeight(1);
+
+
+    dbArray.clear();
   }
+  strokeWeight(1);
+}
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
 //void dealWithSerial() {
