@@ -50,7 +50,7 @@ Servo esc; // instanciate server object
 int setVal = 3.0; // setpoint rotation [Hz]
 int errorSum = 0; // lastError
 int kp = 5; // gain
-int escSpeed = 1350;
+int escSpeed = 1500;
 
 // Time related
 unsigned long timestamp = 0;

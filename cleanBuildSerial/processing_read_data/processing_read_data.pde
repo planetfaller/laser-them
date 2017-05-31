@@ -20,7 +20,7 @@ float angRes=0;
 
 // OCCUPY GRID
 
-int[][] grid = new int[40][40]; // create a hundred by hundred occupy grid
+int[][] grid = new int[100][100]; // create a hundred by hundred occupy grid
 
 
 
@@ -44,6 +44,8 @@ int minPts = 3;
 
 // DATA AND SERIAL 
 ArrayList<Point> pointArray = new ArrayList<Point>(); // Data input array
+ArrayList<Point> bgPointArray = new ArrayList<Point>(); // Data input array
+
 int filterOut;
 
 // FOR SERIAL
@@ -189,7 +191,7 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[0], 115200);
+  comPort = new Serial(this, Serial.list()[2], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
@@ -205,13 +207,13 @@ void draw() {
 
   readSerial();
 
-  for (int i=0; i<40; i++) {
-    for (int j=0; j < 40; j++) {
-      if (grid[i][j]>0) {
-         text(grid[i][j], (i*50)-1000,(j*50)-1000);
-      }
-    }
-  }
+  //for (int i=0; i<100; i++) {
+  //  for (int j=0; j < 100; j++) {
+  //    if (grid[i][j]>0) {
+  //       text(grid[i][j], (i*20)-1000,(j*20)-1000);
+  //    }
+  //  }
+  //}
 
 
 
@@ -230,7 +232,7 @@ void draw() {
 
   // dealWithSerial(); // Serial Communication
 
-  if (pointArray.size() > 100) {
+  if (pointArray.size() > 3) {
 
     int[] clusters = DBSCAN(pointArray); // DBSCAN points for clustering DBSCAN gives each point in set a clusterID
     currentNumberOfClusters = max(clusters); // store current number of clusters 
@@ -312,6 +314,10 @@ void drawOnlyPoints() {
     stroke(#ffffff);
     ellipse(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 2, 2);
   }
+  //for (int i = 0; i < bgPointArray.size(); i++) {
+  //  stroke(#fff000);
+  //  ellipse(bgPointArray.get(i).getX() * distanceOffset, bgPointArray.get(i).getY() * distanceOffset, 2, 2);
+  //}
 }
 
 
