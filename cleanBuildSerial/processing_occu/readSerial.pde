@@ -43,24 +43,27 @@ void readSerial() {
         if (float(data[0]) < 1000 && float(data[0]) != 1) { // only add stuff thats smallahr than 10
 
           Point pointObject = new Point((cos(radians(float(data[1])+angleOffset))*(float(data[0]))), (sin(radians(float(data[1])+angleOffset))*(float(data[0]))), float(data[2]), color(random(150), random(255), random(255)), pointArray.size()-1);
-          pointArray.add(pointObject);
+          // pointArray.add(pointObject);
           // ADD POINT OBJECT TO ARRAYLIST
 
 
           //println(int(pointObject.getX()+1000)/20);
           //println(pointObject.getY()+1000);
-          //if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]< 5) { // populate the grid, readings get added until 
+          if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]< 4) { // populate the grid, readings get added until 
 
-
-          //  grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] = 5;  //grid[int(pointObject.getX()+1000)/50][int(pointObject.getY()+1000)/50]+1;
-          //  // println( grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]);
-          //  pointArray.add(pointObject);
-          //  // println(pointArray.size());
-          //} 
-          //if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]>3) {
-          //  grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] = 6;
-          //  bgPointArray.add(pointObject);
-          //}
+            if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] < 6){
+              grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] = grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] + 2;  //grid[int(pointObject.getX()+1000)/50][int(pointObject.getY()+1000)/50]+1;
+            // println( grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20]);
+              pointArray.add(pointObject);
+            // println(pointArray.size());
+            }
+          } 
+          if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] > 3) {
+            if (grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] < 6){  
+            grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] = grid[int(pointObject.getX()+1000)/20][int(pointObject.getY()+1000)/20] +1;
+            }
+            bgPointArray.add(pointObject);
+          }
         }
       }
     }
@@ -71,13 +74,14 @@ void readSerial() {
 
 
 
-    //for (int k=0; k<100; k++) {
-    //  for (int j=0; j < 100; j++) {
-    //    if (grid[k][j]>0) {
-    //      grid[k][j] = grid[k][j] - 1;
-    //    }
-    //  }
-    //}
+    for (int k=0; k<100; k++) {
+      for (int j=0; j < 100; j++) {
+        
+        if (grid[k][j]>0) {
+          grid[k][j] = grid[k][j] - 1;
+        }
+      }
+    }
 
     serialReadings.clear();
   }
