@@ -57,7 +57,7 @@ int lf = 44;      // ASCII delimiter ","
 FloatList distance, position, timestamp;
 int counter=0;
 ArrayList<String> serialReadings;
-int maxNumberOfPoints=220;
+int maxNumberOfPoints=150;
 
 // COLORS AND GUI
 color[] colorList; 
@@ -139,7 +139,7 @@ void setup() {
 
   cp5.addTextfield("Max Number Of Points")
     .setPosition(0, 220)
-    .setText("220")
+    .setText("150")
     .setInputFilter(1)
     .setSize(100, 20)
     .setAutoClear(false);
@@ -191,7 +191,7 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[2], 115200);
+  comPort = new Serial(this, Serial.list()[0], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
@@ -301,7 +301,7 @@ void drawClusterPoints() {
       color clusterColor = (colorList[pointArray.get(i).getClusterID()]); // pick a color for each clusterID
       stroke(clusterColor);
       fill(clusterColor);
-      text(str(pointArray.get(i).getClusterID()), pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset);
+      // text(str(pointArray.get(i).getClusterID()), pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset); // points
       rect(pointArray.get(i).getX() * distanceOffset, pointArray.get(i).getY() * distanceOffset, 4, 4);
     }
   }
@@ -468,14 +468,14 @@ void drawRectRansac() {
 
     if (ransacOn) {
       stroke(colorList[800]);
-      strokeWeight(6);
+      strokeWeight(4);
       line(xb1 * distanceOffset, yb1 * distanceOffset, xb2 * distanceOffset, yb2 * distanceOffset);
     }
-
+    strokeWeight(1);
 
     dbArray.clear();
   }
-  strokeWeight(1);
+  
 }
 
 // SERIAL EVENT FUNCTION, CALLED WHEN DATA IS AVAILABLE
@@ -627,12 +627,16 @@ void drawGUIText() {
   text( nf(1/(lastTime/1000000), 1, 3)+ " Hz", -width/2, -height/2 + 535);
   text("Angular Resolution:", -width/2, -height/2 + 555);
   text(nf(angRes, 1, 3) + "°", -width/2, -height/2 + 570);
+  
+  text("Measurments/Rotation:", -width/2, -height/2 + 590);
+  text(nf(360.0/angRes, 1, 3), -width/2, -height/2 + 605);
 
+  text("Number of error MS:", -width/2, -height/2 + 625);
+  text(errorCounter, -width/2, -height/2 + 640);
 
-  text("Number of error MS:", -width/2, -height/2 + 590);
-  text(errorCounter, -width/2, -height/2 + 605);
-
-  text("Distance To Mouse:", -width/2, -height/2 + 625);
+  text("Distance To Mouse:", -width/2, -height/2 + 655);
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
-  text(round(totalDistanceToMouse) + " cm", -width/2, -height/2 + 640);
+  text(round(totalDistanceToMouse) + " cm", -width/2, -height/2 + 670);
+  
+
 }
