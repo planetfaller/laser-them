@@ -69,12 +69,11 @@ volatile boolean interruptToggled = false;
 
 // ESC 
 Servo esc; // instanciate server object
-/** proportional speed regulator not used
-
+// proportional speed regulator not used but variables declared and initialized for function
 int setVal = 3.0; // setpoint rotation [Hz]
 int errorSum = 0; // lastError
 int kp = 5; // gain
-**/
+
 int escSpeed = 1500; // set micro seconds to write to ESC, 1500 ~5 Hz rotation
 
 // TIME RELATED

@@ -200,7 +200,7 @@ void setup() {
   filterOut=10; // filter out measurements closer than filterOut
 
   //SERIAL INIT
-  comPort = new Serial(this, Serial.list()[0], 115200);
+  comPort = new Serial(this, Serial.list()[2], 115200);
   comPort.bufferUntil(lf);
   serialReadings = new ArrayList<String>();
 
