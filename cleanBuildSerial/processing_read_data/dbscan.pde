@@ -1,6 +1,13 @@
+/**
+  Calculates each points cluster identity based on DBSCAN algorithm and global variables minPts and eps
+  Code based on : https://en.wikipedia.org/wiki/DBSCAN and http://yarpiz.com/255/ypml110-dbscan-clustering
+
+  @param {ArrayList<Point>} inPA array list of 2 dimensional point objects to run DBSCAN on
+  @return {IntList} IDX list of each points cluster identity
+**/
 int[] DBSCAN(ArrayList<Point> inPA) {
   clusterCount = 0;
-  int C=0; // TEST WE DONT REMEMBER CLUSTERCOUNT
+  int C=0;
   int n = inPA.size(); // number of points
 
   boolean[] visited = new boolean[n];
@@ -8,12 +15,9 @@ int[] DBSCAN(ArrayList<Point> inPA) {
 
   int[] IDX = new int[n]; // index to keep track of clusters
 
-
   float[][] d = new float[n][n]; 
   IntList neighbors = new IntList();
   // IntList neighbors2 = new IntList();
-
-
 
   // calculate the distance from every point in set to every other point in the set.
   for (int i=0; i<n; i++) {
@@ -45,6 +49,19 @@ int[] DBSCAN(ArrayList<Point> inPA) {
   return IDX;
 }
 
+/**
+  Expands cluster
+  
+  @param {IntList} IDX current cluster list
+  @param {int} i iterator
+  @param {IntList} neighbors current neighbors
+  @param {int} C current number of clusters
+  @param {boolean[]} visited current list of visited 
+  @param {float[][]} d matrix with point distances
+  @param {ArrayList<Point>} inPA aray list with points 
+  
+  @return {IntList} IDX intlist of current points cluster identity
+**/
 int[] expandCluster(int[] IDX, int i, IntList neighbors, int C, boolean[] visited, float[][] d, ArrayList<Point> inPA) {
   IDX[i] = C;
   int k = 0;
@@ -73,6 +90,15 @@ int[] expandCluster(int[] IDX, int i, IntList neighbors, int C, boolean[] visite
   return IDX;
 }
 
+/**
+  Check for points in range if to be included in cluster
+  
+  @param {int} row which row to check against
+  @param {float[][]} d matrix with point distances
+  @param {ArrayList<Point>} inPA aray list with points 
+  
+  @return {IntList} neighbors intlist with neighbors
+*/
 IntList regionQuery(int row, float[][]d, ArrayList<Point> inPA) {
   IntList neighbors = new IntList(); // we create a list to mark which points that are dense enough
   for (int i=0; i<inPA.size(); i++) {

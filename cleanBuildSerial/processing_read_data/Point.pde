@@ -1,3 +1,6 @@
+/**
+ Point class for storing 2 dimensional points as objects
+ **/
 class Point implements Comparable<Point>
 {
   float X;
@@ -28,39 +31,85 @@ class Point implements Comparable<Point>
     clusterID = 0; // cluster
     sortMode = 0;
   }
-
+  /**
+    Get Y coordinate
+    
+    @return {float} x coordinate
+  */
   float getX() {
     return X;
   }
-
+  /**
+    Get Y coordinate
+    
+    @return {float} y coordinate
+  */
   float getY() {
     return Y;
   }
-
+  /**
+    Get relative time of birth
+    
+    @return {float} relative time
+  */
   float getTime() {
     return timeDiff;
   }
-
+  /**
+    Get point ID
+    
+    @return {int} ID
+  */
   int getId() {
     return id;
   }
+  /**
+    Get point color
+    
+    @return {color} color of point
+  */
   color getColor() {
     return pointColor;
   }
+  /**
+    Get cluster ID
+    
+    @return {int} cluster ID
+  */
   int getClusterID() {
     return clusterID;
   }
+  /**
+    Set cluster ID
+    
+    @param {int} cluster ID
+    @return void
+  */
   void setcID(int incID) {
     clusterID = incID;
   }
+  /**
+    Set point color
+    
+    @param {color} point color
+    @return void
+  */
   void setColor(color inColor) {
     pointColor = inColor;
   }
-
+  /**
+    Set sorting mode
+    
+    @param {int} sm sorting mode selector
+    @return void
+  */
   void setSortMode(int sm) {
     sortMode = sm;
   }
 
+  /**
+      Comparator function
+  */
   @Override int compareTo(Point p0) {
     if (xory==0)
     {

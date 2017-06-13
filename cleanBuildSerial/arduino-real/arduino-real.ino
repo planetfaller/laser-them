@@ -29,7 +29,7 @@ class Timer
     /**
     Get time from timer
   
-    @return long current timer time
+    @return {unsigned long} current timer time
     */
     unsigned long getTime() {
       return (micros() - startTime);

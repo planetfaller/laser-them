@@ -3,7 +3,7 @@
   waiting for measurement to be completed the result of previous measurement
   is printed to serial. 
   
-  @param boolean biasMode mode to make measurement in (true for bias mode)
+  @param {boolean} biasMode mode to make measurement in (true for bias mode)
   @return void
 */
 
