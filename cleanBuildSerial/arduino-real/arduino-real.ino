@@ -1,7 +1,7 @@
 /**
   360 Degree Rotating LiDAR Lite 3 Measurement System
   Name: arduino-real
-  Purpose: Controller code for initializing Lidar Lite 3, and then making continous
+  Purpose: Controller code for initializing Lidar Lite 3, and then making continuous
   measurements, in a BLDC driven rotating system, deriving angular position based 
   on hall measurement and transferring measurements through the serial interface
 
