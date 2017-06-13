@@ -2,14 +2,14 @@
   360 Degree Rotating LiDAR Lite 3 point cloud data analyzer and visualizer
   Name: processing_read_data
   Purpose: To analyze and visualize 2 dimensional LiDAR point cloud data recieved thorugh serial interface from an Arduino
-
+  GUI Code based on : http://www.sojamo.de/libraries/controlP5/
   @author Rickard Lind & Simon Ask
   @version 1.0 20/05/17
 */
 
 import controlP5.*; // ControlP5 required install via tools --> add tools --> libraries --> search
 import java.util.Collections; // For sorting
-import processing.serial.*; 
+import processing.serial.*; // Serial communication
 
 // COUNTS
 float timeCounter=0;
@@ -78,7 +78,6 @@ int pointArraySize;
 int xory=0; // Sort ascending X/Y. 0/1
 
 // FOR DBSCAN
-
 int currentNumberOfClusters = 0;
 
 void setup() {
@@ -87,9 +86,10 @@ void setup() {
   // surface.setResizable(true);
   fullScreen();    //enable fullscreen
 
-  // FOR GUI
+  // Create GUI object
   cp5 = new ControlP5(this);
 
+  //Buttonbar for Point Mode
   ButtonBar onlyPointBar = cp5.addButtonBar("onlyPointBar")
     .setPosition(0, 20)
     .setSize(100, 20)
@@ -97,6 +97,7 @@ void setup() {
   onlyPointBar.changeItem("a", "text", "On");
   onlyPointBar.changeItem("b", "text", "Off");
 
+  //Buttonbar for Cluster Mode
   ButtonBar clusterPointBar = cp5.addButtonBar("clusterPointBar")
     .setPosition(0, 60)
     .setSize(100, 20)
@@ -104,6 +105,7 @@ void setup() {
   clusterPointBar.changeItem("a", "text", "On");
   clusterPointBar.changeItem("b", "text", "Off");
 
+  //Buttonbar for Line Mode
   ButtonBar lineBar = cp5.addButtonBar("lineBar")
     .setPosition(0, 100)
     .setSize(100, 20)
@@ -111,6 +113,7 @@ void setup() {
   lineBar.changeItem("a", "text", "On");
   lineBar.changeItem("b", "text", "Off");
 
+  //Buttonbar for Ransac Mode
   ButtonBar ransacBar = cp5.addButtonBar("ransacBar")
     .setPosition(0, 140)
     .setSize(100, 20)
@@ -118,6 +121,7 @@ void setup() {
   ransacBar.changeItem("a", "text", "On");
   ransacBar.changeItem("b", "text", "Off");
 
+  //Buttonbar for Rect Mode, object detection.
   ButtonBar rectBar = cp5.addButtonBar("rectBar")
     .setPosition(0, 180)
     .setSize(100, 20)
@@ -125,6 +129,7 @@ void setup() {
   rectBar.changeItem("a", "text", "On");
   rectBar.changeItem("b", "text", "Off");
 
+  //Slider for angle offset
   cp5.addSlider("AngleOffsetSlider")
     .setRange(0, 360)
     .setCaptionLabel("Angle Offset")
@@ -132,6 +137,7 @@ void setup() {
     .setPosition(0, height-20)
     .setSize(100, 10);
 
+  //Slider for distance scale
   cp5.addSlider("DistanceOffsetSlider")
     .setRange(0.1, 1.5)
     .setCaptionLabel("Distance Scale")
@@ -139,6 +145,7 @@ void setup() {
     .setPosition(0, height-40)
     .setSize(100, 10);
 
+  //Textfields for variable inputs.
   cp5.addTextfield("Max Number Of Points")
     .setPosition(0, 220)
     .setText("150")
@@ -207,15 +214,18 @@ void draw() {
   noFill();
   readSerial();
 
+  //Circles around the construction for distance reference, scales with slider.
   ellipse(0, 0, 200 * distanceOffset, 200 * distanceOffset);
   ellipse(0, 0, 600 * distanceOffset, 600 * distanceOffset);
   ellipse(0, 0, 1000 * distanceOffset, 1000 * distanceOffset);
   ellipse(0, 0, 2000 * distanceOffset, 2000 * distanceOffset);
 
+  //Visualize the construction in the GUI, scales with slider.
   fill(100);
   rect(-15*distanceOffset, -15*distanceOffset, 30*distanceOffset, 30*distanceOffset);
   fill(#ffffff);
 
+  //Visualize variables in GUI
   drawGUIText();
 
   if (pointArray.size() > 3) {
@@ -410,7 +420,11 @@ void serialEvent(Serial p) {
   }
 }
 
-// MENU BAR EVENT
+/**
+  Starts or stops ransac mode.
+
+  @return void
+**/
 void ransacBar(int n) {
   if (n == 1) {
     ransacOn = false;
@@ -418,6 +432,11 @@ void ransacBar(int n) {
     ransacOn = true;
   }
 }
+/**
+  Changes starts or stops line mode.
+
+  @return void
+**/
 void lineBar(int n) {
   if (n == 1) {
     linemodeOn = false;
@@ -425,6 +444,11 @@ void lineBar(int n) {
     linemodeOn = true;
   }
 }
+/**
+  Changes starts or stops rect mode.
+
+  @return void
+**/
 void rectBar(int n) {
   if (n == 1) {
     rectmodeOn = false;
@@ -432,6 +456,11 @@ void rectBar(int n) {
     rectmodeOn = true;
   }
 }
+/**
+  Changes starts or stops cluster mode.
+
+  @return void
+**/
 void clusterPointBar(int n) {
   if (n == 1) {
     clusterPointmodeOn = false;
@@ -439,6 +468,11 @@ void clusterPointBar(int n) {
     clusterPointmodeOn = true;
   }
 }
+/**
+  Changes starts or stops point mode.
+
+  @return void
+**/
 void onlyPointBar(int n) {
   if (n == 1) {
     onlyPointmodeOn = false;
@@ -447,16 +481,36 @@ void onlyPointBar(int n) {
   }
 }
 
-// SLIDER EVENT
+/**
+  Changes the angle offset in the GUI with a slider event.
+
+  @return slider value
+**/
 public void AngleOffsetSlider(float myOffset) {
   angleOffset = myOffset;
 }
 
-// SLIDER EVENT
+/**
+  Changes the distance scale in the GUI with a slider event.
+
+  @return distance scale value
+**/
 public void DistanceOffsetSlider(float myOffset) {
   distanceOffset = myOffset;
 }
 
+
+/**
+  Changes algorithm variables with textfield object.
+
+  @param eps, epsilon value for DBSCAN
+  @param minPts value for DBSCAN
+  @param maxNumberOfPoints for DBSCAN
+  @param ransacThreshold for RANSAC
+  @param ransacHypos for RANSAC
+  @param maxNumberOfPoints for RANSAC
+  @return eventStringValue.
+**/
 void controlEvent(ControlEvent theEvent) {
   if (theEvent.isAssignableFrom(Textfield.class)) {
 
@@ -476,6 +530,11 @@ void controlEvent(ControlEvent theEvent) {
   }
 }
 
+/**
+  Visualizes varialbes in GUI.
+
+  @return void
+**/
 void drawGUIText() {
 
   int xCoordinator = mouseX - width/2;
@@ -504,5 +563,4 @@ void drawGUIText() {
   float totalDistanceToMouse = sqrt(pow(float(yCoordinator), 2) + pow(float(xCoordinator), 2)) / distanceOffset;
   text(round(totalDistanceToMouse) + " cm", -width/2, -height/2 + 670);
   
-
 }
