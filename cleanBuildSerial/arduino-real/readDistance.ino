@@ -6,7 +6,6 @@
   @param {boolean} biasMode mode to make measurement in (true for bias mode)
   @return void
 */
-
 void readDistance(boolean biasMode) {
 
   // Write to register 0x00 setting mode biased/corrected

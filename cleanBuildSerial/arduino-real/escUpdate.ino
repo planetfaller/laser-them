@@ -3,7 +3,6 @@
   
   @return void
 */
-
 void escUpdate() {
   float error = setVal - angVel; // calculate error term
   errorSum = error + errorSum; // calculate error sym

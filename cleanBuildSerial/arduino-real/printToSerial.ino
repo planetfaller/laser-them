@@ -4,8 +4,6 @@
   
   @return void
 */
-
-
 void printToSerial() {
   String toPrint;
   Serial.print(distance); // WORD 2 BYTE
