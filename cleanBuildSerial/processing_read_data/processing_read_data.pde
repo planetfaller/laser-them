@@ -433,7 +433,7 @@ void ransacBar(int n) {
   }
 }
 /**
-  Changes starts or stops line mode.
+  Starts or stops line mode.
 
   @return void
 **/
@@ -445,7 +445,7 @@ void lineBar(int n) {
   }
 }
 /**
-  Changes starts or stops rect mode.
+  Starts or stops rect mode.
 
   @return void
 **/
@@ -457,7 +457,7 @@ void rectBar(int n) {
   }
 }
 /**
-  Changes starts or stops cluster mode.
+  Starts or stops cluster mode.
 
   @return void
 **/
@@ -469,7 +469,7 @@ void clusterPointBar(int n) {
   }
 }
 /**
-  Changes starts or stops point mode.
+  Starts or stops point mode.
 
   @return void
 **/
