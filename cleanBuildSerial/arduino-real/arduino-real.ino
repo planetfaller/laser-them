@@ -15,7 +15,7 @@
 
 /**
     Timer class
-**/
+*/
 
 class Timer
 {
