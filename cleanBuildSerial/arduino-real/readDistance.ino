@@ -1,3 +1,12 @@
+/**
+  Initializes a new measurement to be made by Lidar Lite 3. While
+  waiting for measurement to be completed the result of previous measurement
+  is printed to serial. 
+  
+  @param boolean biasMode mode to make measurement in (true for bias mode)
+  @return void
+*/
+
 void readDistance(boolean biasMode) {
 
   // Write to register 0x00 setting mode biased/corrected
@@ -10,22 +19,19 @@ void readDistance(boolean biasMode) {
   else {
     Wire.write(0x03); // biased
   }
-
   Wire.endTransmission();
 
-  //Begin measurement
-
+  // begin measurement
   Wire.beginTransmission(addr);
   Wire.write(0x01);
 
-  //Write last measurements bytes Serial
+  // write last measurements bytes Serial
   printToSerial();
 
   // update rotation speed/position and ESC
-
   if (interruptToggled) {
     angVelFun(); // call to update
-    // escUpdate(); // call to update speed
+    // escUpdate(); // call to update speed not used
     interruptToggled = false; // we dealt with interrupt
   }
 
@@ -38,16 +44,12 @@ void readDistance(boolean biasMode) {
   } while (confirmByte & 1); // wait for LIDAR to complete reading
 
   timestamp = micros(); // collect timestamp
-  timeDiff = timestamp - lastTimeStamp;
-  lastTimeStamp = timestamp;
-
+  timeDiff = timestamp - lastTimeStamp; // calculate time difference
+  lastTimeStamp = timestamp; // this time stamp is last time stamp
 
   angPosFun(); // call to update angular position
 
-
-
   // read two bytes from 0x8f when reading is confirmed
-
   Wire.beginTransmission(addr);
   Wire.write(0x8f);
   Wire.endTransmission();
@@ -56,8 +58,8 @@ void readDistance(boolean biasMode) {
   byte byteOne = Wire.read();
   byte byteTwo = Wire.read();
 
-  distance = (byteOne << 8) + byteTwo; // shift first byte left and concatenade
+  distance = (byteOne << 8) + byteTwo; // shift first byte left and concatenate
 
-  Wire.endTransmission();
+  Wire.endTransmission(); // end i2c transmission
 }
 

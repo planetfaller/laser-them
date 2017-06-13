@@ -1,5 +1,8 @@
-/*
-**   Print to serial. Handle serial communication here.
+/**
+  Serial print, concatenates measured distance, angular position
+  and time difference since last reading
+  
+  @return void
 */
 
 
